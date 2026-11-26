@@ -1,0 +1,240 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens — Bionda "Morning brief".
+ * Source of truth for every color in the UI. Never hard-code a hex in a
+ * component when a token exists here (dynamic per-item tones live in
+ * src/lib/tones.ts and must use these same values).
+ */
+@theme {
+  /* Fonts (CSS vars are injected by next/font in src/app/layout.tsx) */
+  --font-sans: var(--font-geist), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-serif: var(--font-instrument-serif), Georgia, serif;
+
+  /* Surfaces */
+  --color-ink: #05070a; /* page background */
+  --color-ink-2: #0a0f14; /* avatar inner, deep fills */
+  --color-panel: #0b1015; /* metric tiles */
+  --color-cal: #0d1218; /* month calendar weekday cell */
+  --color-cal-weekend: #0b0f15;
+
+  /* Text — from brightest to dimmest */
+  --color-fg-strong: #f2f5f7; /* headings */
+  --color-fg: #e8ecef; /* body / primary text */
+  --color-fg-2: #c9d0d6;
+  --color-fg-3: #b4bcc5;
+  --color-muted: #9ba4ae;
+  --color-muted-2: #8a939d;
+  --color-nav: #a3acb6;
+  --color-dim: #6b7480;
+  --color-dim-2: #5c6570;
+  --color-faint: #545d68;
+  --color-off: #4a535e; /* neutral dots, out-of-month days */
+
+  /* Accents */
+  --color-mint: #1fe0a0;
+  --color-mint-hover: #4feab5;
+  --color-mint-soft: #7df0c8;
+  --color-mint-ink: #04120c; /* text on mint buttons */
+  --color-red: #f26b5e;
+  --color-amber: #f5b13d;
+  --color-blue: #6fa4fa;
+  --color-blue-deep: #4c8df6;
+  --color-violet: #c4a1ff;
+  --color-pink: #f48fc4;
+
+  /* Animations */
+  --animate-live-pulse: bdPulse 2.4s ease-out infinite;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  html,
+  body {
+    /* The design uses the CSS `font:` shorthand everywhere, which resets
+       line-height to `normal`. Match that instead of Tailwind's 1.5. */
+    line-height: normal;
+  }
+  body {
+    margin: 0;
+    background: var(--color-ink);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  a {
+    color: var(--color-mint);
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--color-mint-soft);
+  }
+  ::selection {
+    background: rgba(31, 224, 160, 0.3);
+    color: #fff;
+  }
+  button {
+    cursor: pointer;
+  }
+}
+
+@layer components {
+  /* Frosted glass card — the default container for every block. */
+  .glass {
+    position: relative;
+    background: linear-gradient(180deg, rgba(21, 29, 36, 0.74), rgba(11, 16, 21, 0.62));
+    border: 1px solid rgba(255, 255, 255, 0.075);
+    border-radius: 22px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.055),
+      0 30px 70px -40px rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(18px) saturate(130%);
+    -webkit-backdrop-filter: blur(18px) saturate(130%);
+  }
+
+  /* Small uppercase mono label ("TODAY", "SOURCES · LIVE", ...). */
+  .eyebrow {
+    font: 500 10.5px/1 var(--font-mono);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-dim);
+  }
+
+  /* Rounded status pill. Color + tint are set inline per tone. */
+  .pill {
+    flex: none;
+    font: 500 11px/1 var(--font-mono);
+    padding: 6px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .pill-sm {
+    font: 500 10px/1 var(--font-mono);
+    padding: 4px 7px;
+    border-radius: 999px;
+  }
+  /* Square-ish source tag ("CLICKUP", "FRESHDESK"). */
+  .src-tag {
+    flex: none;
+    font: 500 9.5px/1 var(--font-mono);
+    padding: 4px 6px;
+    border-radius: 4px;
+    color: var(--color-muted);
+    background: rgba(255, 255, 255, 0.07);
+  }
+
+  /* Buttons */
+  .btn-primary {
+    font: 600 12.5px var(--font-sans);
+    padding: 8px 15px;
+    border-radius: 999px;
+    border: 1px solid var(--color-mint);
+    background: var(--color-mint);
+    color: var(--color-mint-ink);
+    box-shadow:
+      0 8px 28px -8px rgba(31, 224, 160, 0.65),
+      inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    transition:
+      transform 0.2s,
+      background 0.2s;
+  }
+  .btn-primary:hover {
+    background: var(--color-mint-hover);
+    transform: translateY(-1px);
+  }
+  .btn-outline {
+    font: 600 12.5px var(--font-sans);
+    padding: 8px 15px;
+    border-radius: 999px;
+    border: 1px solid rgba(31, 224, 160, 0.45);
+    background: transparent;
+    color: var(--color-mint);
+  }
+  .btn-outline:hover {
+    background: rgba(31, 224, 160, 0.08);
+  }
+  .btn-neutral {
+    font: 600 12.5px var(--font-sans);
+    padding: 8px 15px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: transparent;
+    color: var(--color-fg-3);
+  }
+  .btn-neutral:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--color-fg);
+  }
+  .btn-text {
+    font: 500 12.5px var(--font-sans);
+    padding: 8px 10px;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    color: var(--color-muted-2);
+  }
+  .btn-text:hover {
+    color: var(--color-fg);
+  }
+  .btn-link {
+    font: 500 12px var(--font-sans);
+    background: none;
+    border: none;
+    color: var(--color-muted-2);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .btn-link:hover {
+    color: var(--color-fg);
+  }
+
+  /* Inset "detail" panel used inside cards (project detail, meeting prep). */
+  .inset-panel {
+    border-radius: 14px;
+    background: rgba(4, 7, 10, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .row-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+}
+
+/* ---------- Keyframes (names kept from the original design) ---------- */
+@keyframes bdDrift1 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(160px, 90px) scale(1.18); }
+}
+@keyframes bdDrift2 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-140px, 120px) scale(1.12); }
+}
+@keyframes bdDrift3 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-120px, -140px) scale(1.25); }
+}
+@keyframes bdPulse {
+  0% { box-shadow: 0 0 0 0 rgba(31, 224, 160, 0.6); }
+  100% { box-shadow: 0 0 0 10px rgba(31, 224, 160, 0); }
+}
+@keyframes bdFlow {
+  to { stroke-dashoffset: -50; }
+}
+@keyframes bdRing {
+  0% { transform: scale(1); opacity: 0.7; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+@keyframes bdNow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
