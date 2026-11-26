@@ -76,6 +76,7 @@ function EnergyVisual({ pulls, focus }: { pulls: Pull[]; focus: boolean }) {
     labels.push(
       <text
         key={`l${i}`}
+        className="max-sm:hidden"
         x={(CX + dx).toFixed(1)}
         y={(CY - dy).toFixed(1)}
         fill={pulls[i].c}
@@ -199,6 +200,22 @@ export function EnergySection() {
       </div>
       <div className="relative aspect-[1000/470] w-full max-w-[1000px]">
         <EnergyVisual pulls={shown} focus={focus} />
+      </div>
+      {/* Phones: SVG labels would be ~8px, so list the threads as chips instead. */}
+      <div
+        className="relative mt-2 mb-1 flex flex-wrap justify-center gap-1.5 transition-opacity duration-700 sm:hidden"
+        style={{ opacity: focus ? 0.35 : 1 }}
+      >
+        {shown.map((p, i) => (
+          <span
+            key={p.t}
+            className="flex items-center gap-1.5 rounded-full border border-white/8 px-2.5 py-1 text-[11.5px] font-medium"
+            style={{ color: p.c, background: "rgba(255,255,255,.03)", opacity: focus && i > 0 ? 0.5 : 1 }}
+          >
+            <span className="size-1.5 rounded-full" style={{ background: p.c }} />
+            {p.t}
+          </span>
+        ))}
       </div>
       <span className="relative flex items-center gap-2 font-mono text-[11px] font-medium tracking-[.08em] uppercase transition-colors duration-[.6s]" style={{ color: modeFg }}>
         <span className="size-1.5 rounded-full transition-[background] duration-[.6s]" style={{ background: modeFg }} />

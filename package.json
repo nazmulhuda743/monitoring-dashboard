@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "compare": "node scripts/compare-design.cjs"
+    "compare": "node scripts/compare-design.cjs",
+    "shoot:mobile": "node scripts/shoot-mobile.cjs"
   },
   "dependencies": {
     "next": "16.4.6",

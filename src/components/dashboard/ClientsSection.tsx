@@ -22,6 +22,9 @@ function RenewalRunway() {
         <Eyebrow>Renewal runway · next 60 days</Eyebrow>
         <span className="font-mono text-[11.5px] text-dim">bubble size = contract value</span>
       </div>
+      {/* Below ~700px the timeline keeps its width and scrolls inside the card. */}
+      <div className="-mx-6 overflow-x-auto px-6 [scrollbar-width:thin]">
+      <div className="flex min-w-[620px] flex-col gap-2">
       <div className="relative mx-2 h-[178px]">
         <div className="absolute top-[88px] right-0 left-0 h-0.5 rounded-[1px]" style={{ background: "linear-gradient(90deg,rgba(242,107,94,.75),rgba(245,177,61,.35) 45%,rgba(255,255,255,.07))" }} />
         <div className="absolute top-[79px] left-0 h-5 w-0.5 rounded-[1px] bg-fg" style={{ boxShadow: "0 0 12px rgba(255,255,255,.7)" }} />
@@ -56,6 +59,8 @@ function RenewalRunway() {
           </span>
         ))}
       </div>
+      </div>
+      </div>
     </div>
   );
 }
@@ -81,7 +86,7 @@ export function ClientsSection() {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 flex-col gap-1">
                   <span className="text-[15px] leading-[1.3] font-semibold">{c.name}</span>
-                  <span className="text-[12.5px] whitespace-nowrap text-dim">
+                  <span className="text-[12.5px] text-dim sm:whitespace-nowrap">
                     {c.sector} · <span className="font-mono text-fg-3">{c.value}</span>/yr · renews {c.date}
                   </span>
                 </div>

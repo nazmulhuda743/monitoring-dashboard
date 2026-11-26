@@ -90,7 +90,7 @@ export function BriefProvider({ children }: { children: ReactNode }) {
     clearTimeout(flashTimer.current);
     setS((p) => ({ ...p, focus: true, flash: true }));
     const el = document.getElementById(active.length ? "a-needs" : "a-projects");
-    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 24, behavior: "smooth" });
+    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - (window.innerWidth < 1024 ? 76 : 24), behavior: "smooth" });
     flashTimer.current = setTimeout(() => setS((p) => ({ ...p, flash: false })), 2800);
   }, [active.length]);
 

@@ -47,7 +47,7 @@ export function ProjectsSection() {
                         <div className="h-full rounded-[3px]" style={{ width: `${p.pct}%`, background: st.tone.fg, boxShadow: `0 0 14px -2px ${st.tone.fg}` }} />
                       </div>
                       <div className="flex justify-between gap-3">
-                        <span className="text-[13px] whitespace-nowrap text-fg-2">
+                        <span className="text-[13px] text-fg-2 sm:whitespace-nowrap">
                           <span className="text-dim">Next&nbsp;</span> {p.next}
                         </span>
                         <span className="font-mono text-[12px] text-muted-2">{p.pct}%</span>

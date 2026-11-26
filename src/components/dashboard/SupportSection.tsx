@@ -58,8 +58,40 @@ export function SupportSection() {
               </div>
             </div>
 
-            {/* Fixed-width table columns: scroll inside the card on narrow windows. */}
-            <div className="flex min-w-0 flex-col overflow-x-auto">
+            <div className="flex min-w-0 flex-col">
+              {/* Phones: one compact card per agent instead of the wide table. */}
+              <div className="flex flex-col sm:hidden">
+                {tm.agents.map((a) => {
+                  const [label, tone] = AGENT_STATUS[a.status];
+                  const stats: [string, string, string][] = [
+                    ["Open", String(a.open), "#C9D0D6"],
+                    ["Solved", String(a.solved), "#C9D0D6"],
+                    ["1st reply", a.firstReply, a.firstReplyLate ? "#F5B13D" : "#C9D0D6"],
+                    ["SLA", `${a.sla}%`, slaColor(a.sla)],
+                  ];
+                  return (
+                    <div key={a.name} className="flex flex-col gap-2.5 border-b border-white/6 py-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex min-w-0 flex-col gap-[3px]">
+                          <span className="text-[13.5px] font-semibold">{a.name}</span>
+                          <span className="text-[11.5px] leading-[1.35]" style={{ color: a.subTone ? T[a.subTone].fg : "#6B7480" }}>{a.sub}</span>
+                        </div>
+                        <Pill tone={tone}>{label}</Pill>
+                      </div>
+                      <div className="grid grid-cols-4 gap-2">
+                        {stats.map(([k, v, c]) => (
+                          <div key={k} className="flex flex-col gap-1">
+                            <span className="font-mono text-[13px] font-medium" style={{ color: c }}>{v}</span>
+                            <span className="text-[10.5px] text-dim">{k}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {/* sm+: the design's table (scrolls inside the card if ever too narrow). */}
+              <div className="hidden overflow-x-auto sm:block">
               <div className="flex min-w-[430px] flex-col">
               <div className="grid gap-2 border-b border-white/8 pb-2.5" style={{ gridTemplateColumns: COLS }}>
                 <Eyebrow>Person</Eyebrow>
@@ -85,6 +117,7 @@ export function SupportSection() {
                   </div>
                 );
               })}
+              </div>
               </div>
               <div
                 className="mt-3.5 flex items-baseline gap-2.5 rounded-[14px] px-3.5 py-3"

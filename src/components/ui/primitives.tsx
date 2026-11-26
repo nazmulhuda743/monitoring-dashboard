@@ -37,9 +37,9 @@ export function Eyebrow({ children, color, className = "", style }: { children: 
 export function SectionHeader({ num, title, meta }: { num: string; title: string; meta: ReactNode }) {
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-end gap-5">
+      <div className="flex items-end gap-4 sm:gap-5">
         <span
-          className="flex-none font-serif text-[66px] italic leading-[.78] text-mint"
+          className="flex-none font-serif text-[52px] italic leading-[.78] text-mint sm:text-[66px]"
           style={{ textShadow: "0 0 36px rgba(31,224,160,.45)" }}
         >
           {num}
@@ -58,7 +58,7 @@ export function SectionHeader({ num, title, meta }: { num: string; title: string
 
 export function Section({ id, children }: { id: string; children: ReactNode }) {
   return (
-    <section id={id} className="flex scroll-mt-8 flex-col gap-6">
+    <section id={id} className="flex scroll-mt-[84px] flex-col gap-6 lg:scroll-mt-8">
       {children}
     </section>
   );

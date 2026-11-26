@@ -25,7 +25,8 @@ support doing, what did I decide, and is everything else fine.
 - **Approved design:** `design/Bionda_Dashboard.html` (bundled export — open in
   a browser). Readable source of that design (markup + logic + data):
   `design/design-source.html`. When in doubt about a value, grep it there.
-- **Goal of phase 1 (done):** pixel-match the design at 1440px desktop, using mock data.
+- **Phase 1 (done):** pixel-match the design at 1440px desktop, using mock data.
+- **Phase 2 (done):** responsive — tablet and phone layouts (no design for these; ours).
 - **Next phases:** live integrations (see Roadmap).
 
 ## Stack
@@ -49,6 +50,7 @@ npm run lint         # eslint (must be clean)
 npm run typecheck    # tsc --noEmit
 npm run compare      # needs `npm start` running; diffs app vs design at 1440px
 node scripts/compare-design.cjs 1800 400   # + side-by-side crop of a band → .compare/crop.png
+npm run shoot:mobile # needs `npm start`; iPhone/360px/tablet screenshots + overflow check → .compare/mobile/
 ```
 
 `?at=HH:MM` in the URL pins the focus-dial clock (e.g. `/?at=09:37`).
@@ -69,7 +71,7 @@ src/components/ui/primitives  Pill, PillRow, Eyebrow, SectionHeader, Section, Fi
 src/components/dashboard/     one file per page block:
   BriefProvider   state + actions (done/later, approvals, nudges, open panels, energy loop)
   Background      fixed aurora/grid/noise backdrop
-  Sidebar         sticky nav with scroll-spy and live counts
+  Sidebar         nav w/ scroll-spy + live counts: fixed sidebar ≥lg, top bar + drawer <lg
   Hero, FocusDial greeting + 07:00–19:00 day dial
   EnergySection   "N things pulling → one direction" animated SVG
   SummaryCards    3 summary cards + business pulse strip
@@ -105,13 +107,22 @@ Section anchors (used by nav + scroll-spy): `#top #a-needs #a-waiting
 7. Anything that reads the clock / `window` runs in `useEffect` (SSR-safe, and
    Next 16 Cache Components is on). Don't call `setState` synchronously in an
    effect body (lint rule) — use a timer/callback.
-8. Desktop first (target 1440×900). Don't break the existing fluid `clamp()` /
-   `auto-fit` behaviour, but mobile polish is a later phase.
+8. **Responsive.** Desktop (`lg`, ≥1024px) must stay pixel-identical to the
+   design — put every responsive change behind an unprefixed/`sm:`/`max-sm:`
+   value whose `lg` result is the design value, then re-run `npm run compare`.
+   Below `lg`: sidebar → fixed 60px top bar + slide-in drawer (`MobileBar` in
+   Sidebar.tsx), main gets `pt-[84px]`, sections `scroll-mt-[84px]`, 16px side
+   gutters, 64px section gap. Below `sm` (<640px): energy labels become chips,
+   support table becomes per-agent cards, coverage rows stack, renewal runway
+   and December grid scroll sideways inside their cards. Nothing may make the
+   page itself scroll sideways (`npm run shoot:mobile` reports overflow).
+9. The sidebar is `position: fixed` (not sticky) and `html` has
+   `overscroll-behavior: none` — the user explicitly wants it to never move.
 
 ## How to work here
 
 - Before finishing any UI change: `npm run lint && npm run typecheck && npm run build`,
-  then `npm start` + `npm run compare`. Expected: same total height as the design
+  then `npm start` + `npm run compare` + `npm run shoot:mobile` (look at the sheets). Expected: same total height as the design
   (9289px at 1440), sections within ±1px, pixel diff < 1%. Look at
   `.compare/diff.png` / a crop for anything new.
 - Interactive parity was verified by clicking the same controls on both pages
@@ -143,4 +154,4 @@ Section anchors (used by nav + scroll-spy): `#top #a-needs #a-waiting
    (e.g. the team's social tool) or manual input; decide with the user first.
 3. Real actions (Mark done → ClickUp/Freshdesk updates, Approve → post status),
    persistence of local state.
-4. Responsive / mobile pass.
+4. ✅ Responsive / mobile pass.

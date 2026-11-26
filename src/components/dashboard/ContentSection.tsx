@@ -115,12 +115,15 @@ function MonthView() {
         <div className="flex flex-col gap-2.5">
           <Eyebrow>Coverage by channel</Eyebrow>
           {coverage.map((cv) => (
-            <div key={cv.k} className="grid items-center gap-3.5" style={{ gridTemplateColumns: "minmax(110px,170px) minmax(80px,1fr) minmax(140px,200px)" }}>
+            <div
+              key={cv.k}
+              className="grid grid-cols-[1fr_auto] items-center gap-x-3.5 gap-y-2 sm:grid-cols-[minmax(110px,170px)_minmax(80px,1fr)_minmax(140px,200px)] sm:gap-3.5"
+            >
               <span className="flex items-center gap-2 text-[13px] font-semibold">
                 <span className="size-2 rounded-full" style={{ background: cv.fg }} />
                 {cv.name}
               </span>
-              <div className="flex h-1.5 gap-[3px]">
+              <div className="order-last col-span-2 flex h-1.5 gap-[3px] sm:order-none sm:col-span-1">
                 {cv.segs.map((sg) => (
                   <span key={sg.s} className="box-border rounded-[2px]" style={{ flex: sg.n, background: sg.bg, border: sg.border }} />
                 ))}
@@ -129,7 +132,9 @@ function MonthView() {
             </div>
           ))}
         </div>
-        <div className="flex flex-col gap-1.5">
+        {/* Month grid keeps readable cells; on phones it scrolls sideways in the card. */}
+        <div className="-mx-5 overflow-x-auto px-5">
+        <div className="flex min-w-[640px] flex-col gap-1.5">
           <div className="grid grid-cols-7 gap-1.5">
             {DOW.map((d) => (
               <Eyebrow key={d} className="px-1">{d}</Eyebrow>
@@ -175,6 +180,7 @@ function MonthView() {
             <Legend style={{ border: "1px dashed rgba(255,255,255,.3)" }}>Draft</Legend>
             <Legend style={{ border: "1px dashed rgba(242,107,94,.7)" }}>Empty slot</Legend>
           </div>
+        </div>
         </div>
       </div>
       <div className="flex flex-col gap-2.5">
