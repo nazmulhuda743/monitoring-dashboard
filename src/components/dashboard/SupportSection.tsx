@@ -58,7 +58,9 @@ export function SupportSection() {
               </div>
             </div>
 
-            <div className="flex min-w-0 flex-col">
+            {/* Fixed-width table columns: scroll inside the card on narrow windows. */}
+            <div className="flex min-w-0 flex-col overflow-x-auto">
+              <div className="flex min-w-[430px] flex-col">
               <div className="grid gap-2 border-b border-white/8 pb-2.5" style={{ gridTemplateColumns: COLS }}>
                 <Eyebrow>Person</Eyebrow>
                 {["Open", "Solved", "1st reply", "SLA", "Status"].map((h) => (
@@ -83,6 +85,7 @@ export function SupportSection() {
                   </div>
                 );
               })}
+              </div>
               <div
                 className="mt-3.5 flex items-baseline gap-2.5 rounded-[14px] px-3.5 py-3"
                 style={{ background: note.fg === T.mint.fg ? "rgba(31,224,160,.05)" : "rgba(76,141,246,.05)", border: `1px solid ${note.fg === T.mint.fg ? "rgba(31,224,160,.2)" : "rgba(76,141,246,.2)"}` }}

@@ -57,7 +57,12 @@ export function Sidebar() {
   const decisionCount = allDecisions(needStatus, postDecision).length;
 
   return (
-    <aside className="sticky top-0 box-border flex h-screen w-[236px] flex-none py-4 pl-4">
+    <>
+    {/* Spacer keeps the main column where the in-flow sidebar used to be. */}
+    <div aria-hidden className="w-[236px] flex-none" />
+    {/* Fixed (not sticky) so it never moves: immune to overscroll bounce and
+        ancestor overflow/flex quirks. */}
+    <aside className="fixed top-0 left-0 z-10 box-border flex h-dvh w-[236px] py-4 pl-4">
       <div
         className="flex min-w-0 flex-1 flex-col gap-0.5 overflow-y-auto rounded-3xl px-2.5 pt-[18px] pb-4 [scrollbar-width:none]"
         style={{
@@ -111,5 +116,6 @@ export function Sidebar() {
         </div>
       </div>
     </aside>
+    </>
   );
 }
