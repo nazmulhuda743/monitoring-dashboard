@@ -108,3 +108,10 @@ export function businessWeekStart(now: Date | number) {
 export function businessDaysBetween(a: Date | number, b: Date | number) {
   return Math.round((businessDayBounds(b).start - businessDayBounds(a).start) / 86400000);
 }
+
+/** Greeting for a Curaçao hour: morning 05–11, afternoon 12–16, evening 17–04. */
+export function greetingFor(hour: number): "morning" | "afternoon" | "evening" {
+  if (hour >= 5 && hour < 12) return "morning";
+  if (hour >= 12 && hour < 17) return "afternoon";
+  return "evening";
+}

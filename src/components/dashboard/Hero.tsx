@@ -2,7 +2,7 @@
 
 import { profile } from "@/data/brief";
 import { Eyebrow } from "@/components/ui/primitives";
-import { BUSINESS_CITY, dateLine, useBusinessNow } from "@/lib/time";
+import { BUSINESS_CITY, dateLine, greetingFor, useBusinessNow } from "@/lib/time";
 import { useBrief } from "./BriefProvider";
 import { FocusDial } from "./FocusDial";
 
@@ -46,7 +46,7 @@ export function Hero() {
 
         <div className="relative flex min-w-0 flex-col gap-6">
           <h1 className="m-0 text-[clamp(42px,5.6vw,76px)] leading-[.96] font-semibold tracking-[-.05em] text-fg-strong">
-            Good morning,
+            Good {greetingFor(now.hour)},
             <br />
             <span className="font-serif text-[1.14em] leading-none font-normal tracking-[-.015em] text-mint italic" style={{ textShadow: "0 0 60px rgba(31,224,160,.35)" }}>
               {profile.firstName}.

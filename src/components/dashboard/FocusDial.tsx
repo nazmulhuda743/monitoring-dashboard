@@ -78,7 +78,7 @@ export function FocusDial() {
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-center">
         <Eyebrow>{clk.label}</Eyebrow>
         <span className="max-w-[150px] text-[24px] leading-[1.1] font-semibold tracking-[-.03em] text-balance text-fg-strong">{clk.title}</span>
-        <span className="font-mono text-[13px] font-medium text-mint">{clk.sub}</span>
+        <span className="max-w-[150px] font-mono text-[13px] font-medium text-balance text-mint">{clk.sub}</span>
       </div>
     </div>
   );

@@ -102,3 +102,10 @@ describe("decisions and team card", () => {
     expect(mapTeamCheck(OPEN_TASKS, false, 0, NOW).metrics[0].v).toBe(`${OPEN_TASKS.length}+`);
   });
 });
+
+describe("greeting (Curaçao hour)", async () => {
+  const { greetingFor } = await import("@/lib/business-time");
+  it("switches at 05:00, 12:00 and 17:00", () => {
+    expect([4, 5, 11, 12, 16, 17, 23, 0].map(greetingFor)).toEqual(["evening", "morning", "morning", "afternoon", "afternoon", "evening", "evening", "evening"]);
+  });
+});
