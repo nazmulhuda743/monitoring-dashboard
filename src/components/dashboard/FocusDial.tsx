@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { schedule } from "@/data/brief";
 import { fmtDuration, fmtHour } from "@/lib/derive";
+import { useBusinessNow } from "@/lib/time";
 import { Eyebrow } from "@/components/ui/primitives";
 
 /** The dial covers 07:00–19:00 (12 h) as a full circle. */
@@ -18,35 +18,9 @@ const arc = (a: number, b: number, r: number) => {
 };
 const KIND_COLOR = { n: "#C9D0D6", focus: "#1FE0A0", flag: "#F5B13D", lunch: "rgba(255,255,255,.2)" } as const;
 
-/** Fallback before mount (keeps SSR and first client render identical). */
-const DEFAULT_NOW = 9 + 37 / 60;
-
-/**
- * Current time as decimal hours. Live by default; `?at=HH:MM` pins it
- * (used for screenshot comparisons against the design).
- */
-function useNow() {
-  const [now, setNow] = useState(DEFAULT_NOW);
-  useEffect(() => {
-    const pinned = new URLSearchParams(window.location.search).get("at");
-    const fixed = pinned && /^\d{1,2}:\d{2}$/.test(pinned) ? pinned.split(":").map(Number) : null;
-    const read = () => {
-      if (fixed) return setNow(fixed[0] + fixed[1] / 60);
-      const d = new Date();
-      setNow(d.getHours() + d.getMinutes() / 60 + d.getSeconds() / 3600);
-    };
-    const first = setTimeout(read, 0);
-    const id = fixed ? undefined : setInterval(read, 1000);
-    return () => {
-      clearTimeout(first);
-      clearInterval(id);
-    };
-  }, []);
-  return now;
-}
-
 export function FocusDial() {
-  const real = useNow();
+  // Always Curaçao time, regardless of the viewer's device time zone.
+  const real = useBusinessNow().hours;
   const now = Math.min(18.999, Math.max(DAY_START, real));
   const inNow = schedule.find((e) => real >= e.start && real < e.end);
   const next = schedule.find((e) => e.start > real);

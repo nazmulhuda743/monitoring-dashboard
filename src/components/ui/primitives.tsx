@@ -25,9 +25,9 @@ export function PillRow({ pills }: { pills: { t: string; tone: Tone | ToneName }
   );
 }
 
-export function Eyebrow({ children, color, className = "", style }: { children: ReactNode; color?: string; className?: string; style?: CSSProperties }) {
+export function Eyebrow({ children, color, className = "", style, title }: { children: ReactNode; color?: string; className?: string; style?: CSSProperties; title?: string }) {
   return (
-    <span className={`eyebrow ${className}`} style={{ ...(color ? { color } : null), ...style }}>
+    <span className={`eyebrow ${className}`} title={title} style={{ ...(color ? { color } : null), ...style }}>
       {children}
     </span>
   );

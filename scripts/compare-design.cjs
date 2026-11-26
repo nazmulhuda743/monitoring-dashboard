@@ -27,8 +27,10 @@ const APP = process.env.APP_URL || "http://localhost:3000/";
 const SECTIONS = ["top", "a-needs", "a-waiting", "a-projects", "a-clients", "a-content", "a-support", "a-decisions", "a-else"];
 
 async function grab(browser, url, tag) {
-  const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-  await page.clock.setFixedTime(new Date("2026-11-23T09:37:00"));
+  // The design export reads the device clock, our app reads Curaçao time:
+  // run the browser in Curaçao so both show Mon 23 Nov 2026, 09:37.
+  const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, timezoneId: "America/Curacao" });
+  await page.clock.setFixedTime(new Date("2026-11-23T09:37:00-04:00"));
   await page.goto(url);
   await page.waitForTimeout(6000); // energy visual settles into "essential" mode
   const info = await page.evaluate((ids) => ({

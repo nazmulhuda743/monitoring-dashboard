@@ -49,7 +49,7 @@ function sheets(file, tag, scale) {
   for (const [tag, opts] of TARGETS) {
     const ctx = await browser.newContext(opts);
     const page = await ctx.newPage();
-    await page.clock.setFixedTime(new Date("2026-11-23T09:37:00"));
+    await page.clock.setFixedTime(new Date("2026-11-23T09:37:00-04:00"));
     await page.goto(APP);
     await page.waitForTimeout(1500);
     const r = await page.evaluate(() => {

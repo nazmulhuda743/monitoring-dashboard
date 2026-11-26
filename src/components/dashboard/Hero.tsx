@@ -2,6 +2,7 @@
 
 import { profile } from "@/data/brief";
 import { Eyebrow } from "@/components/ui/primitives";
+import { BUSINESS_CITY, dateLine, useBusinessNow } from "@/lib/time";
 import { useBrief } from "./BriefProvider";
 import { FocusDial } from "./FocusDial";
 
@@ -16,12 +17,13 @@ function Legend({ color, glow, label, value }: { color: string; glow?: boolean; 
 
 export function Hero() {
   const { active, goStart } = useBrief();
+  const now = useBusinessNow();
   const cta = active.length ? `Start with ${active[0].short}` : "You’re clear. See projects";
 
   return (
     <>
       <header className="flex flex-wrap items-center justify-between gap-4 px-1">
-        <Eyebrow color="#8A939D">{profile.dateLabel}</Eyebrow>
+        <Eyebrow color="#8A939D" title={`${BUSINESS_CITY}, Curaçao time (UTC−4)`}>{dateLine(now)}</Eyebrow>
         <span className="flex items-center gap-[9px] rounded-full px-3 py-[7px] font-mono text-[11.5px] font-medium text-muted" style={{ border: "1px solid rgba(31,224,160,.22)", background: "rgba(31,224,160,.06)" }}>
           <span className="size-[7px] rounded-full bg-mint" style={{ animation: "bdPulse 2.4s ease-out infinite" }} />
           <span className="text-mint">Live</span>synced {profile.syncedAt}

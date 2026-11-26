@@ -22,9 +22,10 @@ export const profile = {
   firstName: "Bionda",
   initials: "BF",
   role: "CEO · CDS & YamaMi",
-  dateLabel: "Monday · 23 November 2026 · Week 48",
+  /** Curaçao time of the last sync (from the integrations; mock for now). */
   syncedAt: "06:42",
-  nextBrief: "Next brief · Tuesday 06:40",
+  /** Curaçao time the next brief is generated each day. */
+  nextBriefAt: "06:40",
 };
 
 export const sources = [

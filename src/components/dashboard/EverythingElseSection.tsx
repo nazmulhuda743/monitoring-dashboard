@@ -1,6 +1,7 @@
-import { checks, profile } from "@/data/brief";
+import { checks } from "@/data/brief";
 import { T } from "@/lib/tones";
 import { Eyebrow, Section, SectionHeader } from "@/components/ui/primitives";
+import { NextBrief } from "./NextBrief";
 
 export function EverythingElseSection({ showMetrics = true }: { showMetrics?: boolean }) {
   return (
@@ -40,7 +41,7 @@ export function EverythingElseSection({ showMetrics = true }: { showMetrics?: bo
           <br />
           <span className="text-mint">The rest can wait until tomorrow.</span>
         </span>
-        <Eyebrow>{profile.nextBrief}</Eyebrow>
+        <NextBrief />
       </div>
     </Section>
   );

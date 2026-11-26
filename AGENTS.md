@@ -53,7 +53,7 @@ node scripts/compare-design.cjs 1800 400   # + side-by-side crop of a band → .
 npm run shoot:mobile # needs `npm start`; iPhone/360px/tablet screenshots + overflow check → .compare/mobile/
 ```
 
-`?at=HH:MM` in the URL pins the focus-dial clock (e.g. `/?at=09:37`).
+`?at=HH:MM` in the URL pins the time of day, in Curaçao time (e.g. `/?at=09:37`).
 If `next start` serves 500s for CSS/JS chunks after a rebuild, kill the old
 server (`pkill -f next-server`), `rm -rf .next`, rebuild, restart.
 
@@ -66,7 +66,8 @@ src/app/globals.css           design tokens (@theme), base, component classes, k
 src/data/types.ts             domain types = contract for future API adapters
 src/data/brief.ts             all mock data (copied verbatim from the design)
 src/lib/tones.ts              semantic tones {fg, tint}: red/blue/amber/mint/grey
-src/lib/derive.ts             pure helpers (decisions list, time formatting)
+src/lib/derive.ts             pure helpers (decisions list, duration formatting)
+src/lib/time.ts               Curaçao business clock (all displayed times go through it)
 src/components/ui/primitives  Pill, PillRow, Eyebrow, SectionHeader, Section, Field
 src/components/dashboard/     one file per page block:
   BriefProvider   state + actions (done/later, approvals, nudges, open panels, energy loop)
@@ -116,7 +117,14 @@ Section anchors (used by nav + scroll-spy): `#top #a-needs #a-waiting
    support table becomes per-agent cards, coverage rows stack, renewal runway
    and December grid scroll sideways inside their cards. Nothing may make the
    page itself scroll sideways (`npm run shoot:mobile` reports overflow).
-9. The sidebar is `position: fixed` (not sticky) and `html` has
+9. **Time zone: everything is Curaçao time** (`America/Curacao`, Willemstad,
+   UTC−4, no DST) — the client lives there. Never use `getHours()`,
+   `toLocaleString()` without `timeZone`, or other device-local time. Use
+   `src/lib/time.ts`: `useBusinessNow()` for live values, `formatBusinessTime()`
+   for API timestamps (UTC ISO → Curaçao HH:MM), `dateLine()` for the header.
+   Server/first paint use `REFERENCE_TIME` (Mon 23 Nov 2026 09:37) to avoid
+   hydration mismatches; the live clock takes over after mount.
+10. The sidebar is `position: fixed` (not sticky) and `html` has
    `overscroll-behavior: none` — the user explicitly wants it to never move.
 
 ## How to work here
