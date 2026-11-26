@@ -1,6 +1,5 @@
 "use client";
 
-import { projectGroups, projects } from "@/data/brief";
 import type { ProjectStatus } from "@/data/types";
 import { T, type Tone } from "@/lib/tones";
 import { Eyebrow, Field, Pill, Section, SectionHeader } from "@/components/ui/primitives";
@@ -14,15 +13,16 @@ export const PROJECT_STATUS: Record<ProjectStatus, { label: string; tone: Tone; 
 };
 
 export function ProjectsSection() {
-  const { projectOpen, toggleProject } = useBrief();
+  const { data, projectOpen, toggleProject } = useBrief();
+  const total = data.projectGroups.reduce((n, g) => n + g.items.length, 0);
   return (
     <Section id="a-projects">
-      <SectionHeader num="03" title="Where every project stands" meta={`${projects.length} projects from ClickUp · tap a row for detail`} />
+      <SectionHeader num="03" title="Where every project stands" meta={`${total} projects from ClickUp · tap a row for detail`} />
       <div className="glass px-5 pt-1 pb-2">
-        {projectGroups.map((g) => {
-          const items = projects.filter((p) => p.co === g.co).sort((a, b) => PROJECT_STATUS[a.s].rank - PROJECT_STATUS[b.s].rank);
+        {data.projectGroups.map((g) => {
+          const items = g.items;
           return (
-            <div key={g.co} className="flex flex-col">
+            <div key={g.label} className="flex flex-col">
               <div className="flex items-baseline justify-between pt-4 pb-2">
                 <Eyebrow color="#8A939D">{g.label}</Eyebrow>
                 <span className="font-mono text-[11px] text-dim">{items.length} projects</span>
@@ -35,7 +35,14 @@ export function ProjectsSection() {
                     <div onClick={() => toggleProject(p.id)} className="flex cursor-pointer flex-col gap-2.5 py-3.5">
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex min-w-0 flex-col gap-[3px]">
-                          <span className="text-[15px] leading-[1.3] font-semibold">{p.name}</span>
+                          <span className="text-[15px] leading-[1.3] font-semibold">
+                            {p.name}
+                            {p.url && open && (
+                              <a href={p.url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="ml-2 font-mono text-[11px] font-medium">
+                                open ↗
+                              </a>
+                            )}
+                          </span>
                           <span className="text-[13px] leading-[1.4] text-muted-2">{p.line}</span>
                         </div>
                         <div className="flex flex-none items-center gap-2.5">

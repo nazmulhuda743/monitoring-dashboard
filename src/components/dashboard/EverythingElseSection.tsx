@@ -1,9 +1,9 @@
-import { checks } from "@/data/brief";
+import type { Check } from "@/data/types";
 import { T } from "@/lib/tones";
 import { Eyebrow, Section, SectionHeader } from "@/components/ui/primitives";
 import { NextBrief } from "./NextBrief";
 
-export function EverythingElseSection({ showMetrics = true }: { showMetrics?: boolean }) {
+export function EverythingElseSection({ checks, showMetrics = true }: { checks: Check[]; showMetrics?: boolean }) {
   return (
     <Section id="a-else">
       <SectionHeader num="08" title="Everything else" meta="Checked for you overnight" />

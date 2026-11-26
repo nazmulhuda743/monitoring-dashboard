@@ -1,7 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { needColor, needs, pulse } from "@/data/brief";
+import { pulse } from "@/data/brief";
+import type { ProjectStatus } from "@/data/types";
 import { T, type Tone } from "@/lib/tones";
 import { Eyebrow, PillRow } from "@/components/ui/primitives";
 import { useBrief } from "./BriefProvider";
@@ -61,8 +62,32 @@ function SummaryCard({
 
 const seg = (bg: string, glow = "none"): Seg => ({ bg, glow });
 
+const PROJECT_LOOK: Record<ProjectStatus, { color: string; glow: string; shadow: string; hover: string; tone: Tone; headline: (n: number) => string; pill: (n: number) => string }> = {
+  risk: { color: "#F26B5E", glow: GLOW.red, shadow: "0 0 34px rgba(242,107,94,.4)", hover: "rgba(242,107,94,.4)", tone: T.red, headline: (n) => `${n} at risk`, pill: (n) => `${n} at risk` },
+  you: { color: "#6FA4FA", glow: GLOW.blue, shadow: "0 0 34px rgba(111,164,250,.4)", hover: "rgba(111,164,250,.4)", tone: T.blue, headline: (n) => `${n} need${n === 1 ? "s" : ""} you`, pill: (n) => `${n} need${n === 1 ? "s" : ""} you` },
+  watch: { color: "#F5B13D", glow: "none", shadow: "0 0 34px rgba(245,177,61,.4)", hover: "rgba(245,177,61,.4)", tone: T.amber, headline: (n) => `${n} to watch`, pill: (n) => `${n} watch` },
+  ok: { color: "#1FE0A0", glow: GLOW.mint, shadow: "0 0 34px rgba(31,224,160,.45)", hover: "rgba(31,224,160,.4)", tone: T.mint, headline: () => "All on track", pill: (n) => `${n} on track` },
+};
+const ORDER: ProjectStatus[] = ["risk", "you", "watch", "ok"];
+
+/** "1 at risk" headline, one bar per project (worst first) and pills for the rest. */
+function projectSummary(statuses: ProjectStatus[]) {
+  const counts = Object.fromEntries(ORDER.map((s) => [s, statuses.filter((x) => x === s).length])) as Record<ProjectStatus, number>;
+  const top = ORDER.find((s) => counts[s]) ?? "ok";
+  const look = PROJECT_LOOK[top];
+  return {
+    value: statuses.length ? look.headline(counts[top]) : "No projects",
+    color: look.color,
+    shadow: look.shadow,
+    hover: look.hover,
+    segs: ORDER.flatMap((s) => Array.from({ length: counts[s] }, () => seg(PROJECT_LOOK[s].color, PROJECT_LOOK[s].glow))),
+    pills: ORDER.filter((s) => s !== top && counts[s]).map((s) => ({ t: PROJECT_LOOK[s].pill(counts[s]), tone: PROJECT_LOOK[s].tone })),
+  };
+}
+
 export function SummaryCards() {
-  const { active, needStatus } = useBrief();
+  const { data, active, needStatus } = useBrief();
+  const needs = data.needs;
   const k = active.length;
   const doneN = needs.filter((n) => needStatus[n.id] === "done").length;
   const laterN = needs.filter((n) => needStatus[n.id] === "later").length;
@@ -71,14 +96,17 @@ export function SummaryCards() {
     const st = needStatus[n.id];
     if (st === "done") return seg("#1FE0A0", "0 0 12px rgba(31,224,160,.6)");
     if (st === "later") return seg("rgba(245,177,61,.25)");
-    return seg(needColor[n.id], `0 0 12px ${needColor[n.id]}66`);
+    return seg(n.color, `0 0 12px ${n.color}66`);
   });
   const needPills: { t: string; tone: Tone }[] = [];
-  if (!needStatus.telecom) needPills.push({ t: "● 1 overdue", tone: T.red });
-  const dueToday = active.filter((n) => n.id !== "telecom").length;
+  const overdue = active.filter((n) => n.overdue).length;
+  if (overdue) needPills.push({ t: `● ${overdue} overdue`, tone: T.red });
+  const dueToday = active.length - overdue;
   if (dueToday) needPills.push({ t: `${dueToday} due today`, tone: T.grey });
   if (doneN) needPills.push({ t: `✓ ${doneN} done`, tone: T.mint });
   if (!needPills.length) needPills.push({ t: `${laterN} later today`, tone: T.amber });
+
+  const proj = projectSummary(data.projectGroups.flatMap((g) => g.items.map((p) => p.s)));
 
   return (
     <>
@@ -96,16 +124,12 @@ export function SummaryCards() {
         <SummaryCard
           href="#a-projects"
           label="Projects"
-          value="1 at risk"
-          color="#F26B5E"
-          shadow="0 0 34px rgba(242,107,94,.4)"
-          hoverBorder="rgba(242,107,94,.4)"
-          segs={[seg("#F26B5E", GLOW.red), seg("#6FA4FA", GLOW.blue), seg("#F5B13D"), seg("#F5B13D"), ...Array(4).fill(seg("#1FE0A0", GLOW.mint))]}
-          pills={[
-            { t: "1 needs you", tone: T.blue },
-            { t: "2 watch", tone: T.amber },
-            { t: "4 on track", tone: T.mint },
-          ]}
+          value={proj.value}
+          color={proj.color}
+          shadow={proj.shadow}
+          hoverBorder={proj.hover}
+          segs={proj.segs}
+          pills={proj.pills}
         />
         <SummaryCard
           href="#a-else"

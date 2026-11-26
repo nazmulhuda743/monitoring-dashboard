@@ -6,7 +6,7 @@ import type { ToneName } from "@/lib/tones";
 
 export type SourceName = "Freshdesk" | "ClickUp" | "LinkedIn" | "Calendar";
 
-export type NeedId = "telecom" | "board" | "linkedin" | "pricing";
+export type NeedId = string;
 export type NeedStatus = "done" | "later";
 
 export interface Need {
@@ -21,6 +21,19 @@ export interface Need {
   title: string;
   why: string;
   cta: string;
+  /** Link the main button opens (e.g. the ClickUp task). */
+  url?: string;
+  /** Past due → counted as "overdue" in the summary card. */
+  overdue: boolean;
+  /** Bar color in the summary card. */
+  color: string;
+  /** Arrow/label color in the energy visual (defaults to `color`). */
+  energyColor?: string;
+  /**
+   * What "Decided this week" shows when this is marked done.
+   * `undefined` → a generic line; `null` → nothing.
+   */
+  decision?: Omit<Decision, "day"> | null;
 }
 
 export type MeetingKind = "n" | "focus" | "flag" | "lunch";
@@ -57,13 +70,15 @@ export interface WaitingItem {
   due: string;
   s: WaitState;
   label: string;
+  url?: string;
+  /** Label in the energy visual while this is late and not nudged. */
+  energyLabel?: string;
 }
 
 export type ProjectStatus = "risk" | "you" | "watch" | "ok";
 
 export interface Project {
   id: string;
-  co: "CDS" | "YamaMi";
   s: ProjectStatus;
   name: string;
   line: string;
@@ -73,6 +88,13 @@ export interface Project {
   updated: string;
   latest: string;
   items: string[];
+  url?: string;
+}
+
+export interface ProjectGroup {
+  /** Company / ClickUp space, e.g. "Caribglobal Data Services". */
+  label: string;
+  items: Project[];
 }
 
 export type ClientHealth = "risk" | "watch" | "ok";
@@ -149,4 +171,33 @@ export interface Check {
   verdict: string;
   ok: boolean;
   metrics: { v: string; k: string }[];
+}
+
+export interface Pull {
+  /** Color */
+  c: string;
+  /** Label */
+  t: string;
+}
+
+export interface SourceInfo {
+  name: SourceName;
+  /** Last sync, Curaçao "HH:MM". */
+  t: string;
+  /** live = real data, mock = sample data, error = fell back to sample data. */
+  state: "live" | "mock" | "error";
+}
+
+/** Everything the page renders that comes from an integration. */
+export interface BriefData {
+  needs: Need[];
+  waiting: WaitingItem[];
+  /** Override for the pills above "Waiting on others" (derived when absent). */
+  waitingPills?: { t: string; tone: ToneName }[];
+  projectGroups: ProjectGroup[];
+  pastDecisions: Decision[];
+  checks: Check[];
+  sources: SourceInfo[];
+  /** Extra threads in the energy visual (after needs, posts and late hand-offs). */
+  otherPulls: Pull[];
 }

@@ -12,10 +12,12 @@ import { Sidebar } from "@/components/dashboard/Sidebar";
 import { SummaryCards } from "@/components/dashboard/SummaryCards";
 import { SupportSection } from "@/components/dashboard/SupportSection";
 import { WaitingSection } from "@/components/dashboard/WaitingSection";
+import { getBriefData } from "@/server/brief";
 
-export default function MorningBrief() {
+export default async function MorningBrief() {
+  const data = await getBriefData();
   return (
-    <BriefProvider>
+    <BriefProvider data={data}>
       <div id="top" className="relative min-h-screen bg-ink text-fg">
         <Background />
         <div className="relative z-[1] flex min-h-screen">
@@ -34,7 +36,7 @@ export default function MorningBrief() {
               <ContentSection />
               <SupportSection />
               <DecisionsSection />
-              <EverythingElseSection />
+              <EverythingElseSection checks={data.checks} />
             </div>
           </main>
         </div>

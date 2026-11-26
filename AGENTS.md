@@ -27,7 +27,8 @@ support doing, what did I decide, and is everything else fine.
   `design/design-source.html`. When in doubt about a value, grep it there.
 - **Phase 1 (done):** pixel-match the design at 1440px desktop, using mock data.
 - **Phase 2 (done):** responsive — tablet and phone layouts (no design for these; ours).
-- **Next phases:** live integrations (see Roadmap).
+- **Phase 3 (in progress):** live integrations. **ClickUp is built** (needs the
+  client's token in Vercel); Freshdesk, Calendar, LinkedIn still show sample data.
 
 ## Stack
 
@@ -51,6 +52,9 @@ npm run typecheck    # tsc --noEmit
 npm run compare      # needs `npm start` running; diffs app vs design at 1440px
 node scripts/compare-design.cjs 1800 400   # + side-by-side crop of a band → .compare/crop.png
 npm run shoot:mobile # needs `npm start`; iPhone/360px/tablet screenshots + overflow check → .compare/mobile/
+npm test             # vitest: ClickUp mapping + end-to-end loader against a fake ClickUp
+npm run fake:clickup # fake ClickUp API on :4010 (token pk_test) for local demos:
+                     #   CLICKUP_API_TOKEN=pk_test CLICKUP_API_URL=http://localhost:4010 npm run dev
 ```
 
 `?at=HH:MM` in the URL pins the time of day, in Curaçao time (e.g. `/?at=09:37`).
@@ -64,7 +68,12 @@ src/app/layout.tsx            fonts + <html>
 src/app/page.tsx              composes the page (sidebar + main column)
 src/app/globals.css           design tokens (@theme), base, component classes, keyframes
 src/data/types.ts             domain types = contract for future API adapters
-src/data/brief.ts             all mock data (copied verbatim from the design)
+src/data/brief.ts             sample data (verbatim from the design) → `mockBrief`
+src/server/brief.ts           getBriefData(): 'use cache' + cacheLife("brief") — sample brief
+                              with each live integration patched in; failures fall back
+src/server/clickup/           api.ts (client) · adapt.ts (pure mapping, tested) · index.ts (loader + env config)
+src/app/api/health/route.ts   GET /api/health — integration states + counts (no secrets)
+src/test/                     ClickUp fixtures, fake ClickUp server, test stubs
 src/lib/tones.ts              semantic tones {fg, tint}: red/blue/amber/mint/grey
 src/lib/derive.ts             pure helpers (decisions list, duration formatting)
 src/lib/time.ts               Curaçao business clock (all displayed times go through it)
@@ -146,6 +155,33 @@ Section anchors (used by nav + scroll-spy): `#top #a-needs #a-waiting
   `nazmulhuda743 <nazmulhuda743@users.noreply.github.com>`.
 - The user prefers concise updates and an honest status (what's verified, what isn't).
 
+## Data & integrations
+
+- Flow: `page.tsx` (server) → `getBriefData()` → `<BriefProvider data>` →
+  client components read `useBrief().data`. Server components get props.
+  Contract: `BriefData` in `src/data/types.ts`. Data must be serializable.
+- Cache profile `brief` in `next.config.ts`: stale 60s, revalidate 120s,
+  expire 1h — page and `/api/health` are prerendered and refreshed in the
+  background every ~2 min (on Vercel too).
+- **Secrets only in env vars, read only in `src/server/**`** (`import "server-only"`).
+  Env vars: see `.env.example`. Never log or return tokens.
+- Each integration replaces only its own items in the sample brief (e.g. needs
+  whose `source` starts with "ClickUp"); others stay sample until connected.
+  Sidebar "Sources · live" dot: mint = live/sample, amber "retrying" = failed
+  (page still renders sample data). Hover shows which.
+- **ClickUp mapping** (`adapt.ts`, agreed with the user — confirm against the
+  client's real workspace):
+  Needs you = open tasks assigned to me due ≤ end of today (Curaçao);
+  Waiting = open tasks I created, assigned to others (+ closed <24h → Delivered);
+  Projects = Lists (or Folders via `CLICKUP_PROJECT_LEVEL`) with open work or
+  activity in 7 days, grouped by Space, max 12; health from the List status
+  text if set, else derived (≥3 overdue, or ≥2 and >25% → risk; mine due ≤7d →
+  needs you; 1 overdue → watch); Decided = tasks tagged `decision` done in the
+  last 7 days; Team card = open / overdue / closed-7d.
+  ~20 API calls per refresh (ClickUp limit: 100/min).
+- Still to do for ClickUp: write actions (Mark done → close task, Nudge →
+  comment) and tuning on real data.
+
 ## Known, accepted differences from the design export
 
 - Arrows `→ ↗ ↑` render in Geist Mono here; the export fell back to a system
@@ -155,8 +191,8 @@ Section anchors (used by nav + scroll-spy): `#top #a-needs #a-waiting
 ## Roadmap
 
 1. ✅ Desktop pixel-match with mock data.
-2. Data adapters behind `src/data/types.ts`: Freshdesk (API key), ClickUp (API
-   token), Google Calendar (OAuth) — via Next route handlers / server code,
+2. Data adapters behind `src/data/types.ts`: ✅ ClickUp (API token, built;
+   awaiting the client's token), Freshdesk (API key), Google Calendar (OAuth) — via Next route handlers / server code,
    secrets in env vars, never in the client. LinkedIn: the API doesn't expose
    another person's scheduled posts easily — likely needs a scheduler tool
    (e.g. the team's social tool) or manual input; decide with the user first.

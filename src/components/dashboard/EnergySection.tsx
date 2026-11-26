@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactElement } from "react";
-import { needColor, otherPulls, posts } from "@/data/brief";
+import { posts } from "@/data/brief";
 import { Eyebrow } from "@/components/ui/primitives";
 import { useBrief } from "./BriefProvider";
 
@@ -142,15 +142,16 @@ function EnergyVisual({ pulls, focus }: { pulls: Pull[]; focus: boolean }) {
 const TITLE = "m-0 text-[clamp(28px,3.8vw,48px)] leading-[1.06] font-semibold tracking-[-.045em] text-balance text-fg-strong";
 
 export function EnergySection() {
-  const { active, postDecision, nudged, focus, goStart } = useBrief();
+  const { data, active, postDecision, nudged, focus, goStart } = useBrief();
 
-  // The energy visual uses a slightly brighter grey than the summary bars.
-  const pulls: Pull[] = active.map((n) => ({ c: n.id === "pricing" ? "#C9D0D6" : needColor[n.id], t: n.energyLabel }));
+  const pulls: Pull[] = active.map((n) => ({ c: n.energyColor ?? n.color, t: n.energyLabel }));
   posts.forEach((p) => {
     if (p.energyLabel && !postDecision[p.id]) pulls.push({ c: "#6FA4FA", t: p.energyLabel });
   });
-  if (!nudged.w1) pulls.push({ c: "#F26B5E", t: "Cash forecast · late" });
-  pulls.push(...otherPulls);
+  data.waiting.forEach((w) => {
+    if (w.s === "late" && !nudged[w.id]) pulls.push({ c: "#F26B5E", t: w.energyLabel ?? `${w.what.slice(0, 18)} · late` });
+  });
+  pulls.push(...data.otherPulls);
   const shown = pulls.slice(0, 16);
   const n = shown.length;
   const essential = active[0]?.title ?? "Protect the focus block for next quarter";

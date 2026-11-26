@@ -5,8 +5,8 @@ import { Section, SectionHeader } from "@/components/ui/primitives";
 import { useBrief } from "./BriefProvider";
 
 export function DecisionsSection() {
-  const { needStatus, postDecision } = useBrief();
-  const decisions = allDecisions(needStatus, postDecision);
+  const { data, needStatus, postDecision } = useBrief();
+  const decisions = allDecisions(data.needs, data.pastDecisions, needStatus, postDecision);
   return (
     <Section id="a-decisions">
       <SectionHeader num="07" title="Decided this week" meta="So you don’t have to remember it. Each decision was shared with the people it affects." />

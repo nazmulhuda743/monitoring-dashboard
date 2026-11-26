@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { profile, sources, waiting } from "@/data/brief";
+import { profile } from "@/data/brief";
 import { allDecisions } from "@/lib/derive";
 import { Eyebrow } from "@/components/ui/primitives";
 import { useBrief, weekPosts } from "./BriefProvider";
@@ -73,10 +73,11 @@ function Avatar({ size = 38 }: { size?: number }) {
 /** The nav card itself — shared by the desktop sidebar and the mobile drawer. */
 function NavPanel({ onNavigate, className = "" }: { onNavigate?: () => void; className?: string }) {
   const cur = useActiveSection();
-  const { active, nudged, needStatus, postDecision, postStatus } = useBrief();
-  const waitLate = waiting.filter((w) => w.s === "late" && !nudged[w.id]).length || "";
+  const { data, active, nudged, needStatus, postDecision, postStatus } = useBrief();
+  const waitLate = data.waiting.filter((w) => w.s === "late" && !nudged[w.id]).length || "";
   const readyWeek = weekPosts.filter((p) => postStatus(p) === "ready").length;
-  const decisionCount = allDecisions(needStatus, postDecision).length;
+  const decisionCount = allDecisions(data.needs, data.pastDecisions, needStatus, postDecision).length;
+  const projectCount = data.projectGroups.reduce((n, g) => n + g.items.length, 0);
 
   return (
     <nav
@@ -109,7 +110,7 @@ function NavPanel({ onNavigate, className = "" }: { onNavigate?: () => void; cla
       <NavItem href="#a-needs" label="Needs you" count={active.length} countColor="#F5B13D" on={cur === "a-needs"} />
       <NavItem href="#a-waiting" label="Waiting on others" count={waitLate} countColor="#F26B5E" on={cur === "a-waiting"} />
       <Group>Progress</Group>
-      <NavItem href="#a-projects" label="Projects" count={8} countColor="#6B7480" on={cur === "a-projects"} />
+      <NavItem href="#a-projects" label="Projects" count={projectCount} countColor="#6B7480" on={cur === "a-projects"} />
       <NavItem href="#a-clients" label="Key clients" count={5} countColor="#6B7480" on={cur === "a-clients"} />
       <NavItem href="#a-content" label="Content to approve" count={readyWeek} countColor="#6FA4FA" on={cur === "a-content"} />
       <NavItem href="#a-support" label="Support team" count="96%" countColor="#1FE0A0" on={cur === "a-support"} />
@@ -120,11 +121,18 @@ function NavPanel({ onNavigate, className = "" }: { onNavigate?: () => void; cla
       <div className="min-h-5 flex-1" />
       <div className="-mx-0.5 flex flex-col gap-[9px] rounded-[14px] px-3 pt-3.5 pb-0.5" style={{ background: "rgba(4,7,10,.35)", border: "1px solid rgba(255,255,255,.05)" }}>
         <Eyebrow color="#545D68">Sources · live</Eyebrow>
-        {sources.map((s) => (
-          <div key={s.name} className="flex items-center gap-2 text-[12.5px] font-medium text-muted">
-            <span className="size-1.5 rounded-full bg-mint" style={{ boxShadow: "0 0 8px #1FE0A0" }} />
+        {data.sources.map((s) => (
+          <div
+            key={s.name}
+            className="flex items-center gap-2 text-[12.5px] font-medium text-muted"
+            title={s.state === "error" ? `${s.name}: couldn't refresh, showing sample data` : s.state === "mock" ? `${s.name}: sample data (not connected yet)` : `${s.name}: live, synced ${s.t} Curaçao time`}
+          >
+            <span
+              className="size-1.5 rounded-full"
+              style={s.state === "error" ? { background: "#F5B13D", boxShadow: "0 0 8px #F5B13D" } : { background: "#1FE0A0", boxShadow: "0 0 8px #1FE0A0" }}
+            />
             <span className="flex-1">{s.name}</span>
-            <span className="font-mono text-[11px] text-dim-2">{s.t}</span>
+            <span className="font-mono text-[11px]" style={{ color: s.state === "error" ? "#F5B13D" : "#5C6570" }}>{s.state === "error" ? "retrying" : s.t}</span>
           </div>
         ))}
         <span className="h-1" />

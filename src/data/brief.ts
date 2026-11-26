@@ -5,6 +5,7 @@
  * that returns the same type — components must not change.
  */
 import type {
+  BriefData,
   CalendarEvent,
   Check,
   Client,
@@ -28,11 +29,11 @@ export const profile = {
   nextBriefAt: "06:40",
 };
 
-export const sources = [
-  { name: "Freshdesk", t: "06:40" },
-  { name: "ClickUp", t: "06:41" },
-  { name: "LinkedIn", t: "06:38" },
-  { name: "Calendar", t: "06:42" },
+export const sources: BriefData["sources"] = [
+  { name: "Freshdesk", t: "06:40", state: "mock" },
+  { name: "ClickUp", t: "06:41", state: "mock" },
+  { name: "LinkedIn", t: "06:38", state: "mock" },
+  { name: "Calendar", t: "06:42", state: "mock" },
 ];
 
 export const needs: Need[] = [
@@ -46,6 +47,9 @@ export const needs: Need[] = [
     title: "Caribbean Telecom escalation is past SLA",
     why: "Ticket #4821: their data export has failed since Friday. $180k/yr account, renewal on Dec 15. A short call from you would reset the tone — Ana has the facts ready.",
     cta: "Open ticket",
+    overdue: true,
+    color: "#F26B5E",
+    decision: { what: "Handled the Caribbean Telecom escalation", told: "Told: Ana, Kevin", src: "FRESHDESK" },
   },
   {
     id: "board",
@@ -57,6 +61,9 @@ export const needs: Need[] = [
     title: "Read the board deck before prep with Marco",
     why: "14 slides, about 20 minutes. Your 09:00 focus block is free for it.",
     cta: "Open deck",
+    overdue: false,
+    color: "#F5B13D",
+    decision: null,
   },
   {
     id: "linkedin",
@@ -68,6 +75,9 @@ export const needs: Need[] = [
     title: "Approve your post on Caribbean data sovereignty",
     why: "Sofía drafted it and scheduled it for 10:00. It won’t publish without your OK.",
     cta: "Review draft",
+    overdue: false,
+    color: "#F5B13D",
+    decision: { what: "Approved your LinkedIn post on Caribbean data sovereignty", told: "Told: Sofía", src: "LINKEDIN" },
   },
   {
     id: "pricing",
@@ -79,16 +89,12 @@ export const needs: Need[] = [
     title: "Decide seller fee pricing for Seller Fees v2",
     why: "The only thing blocking the Dec 1 launch. Lucía recommends a flat 6.5%; her one-page summary is on the task.",
     cta: "Review in ClickUp",
+    overdue: false,
+    color: "#B4BCC5",
+    energyColor: "#C9D0D6",
+    decision: { what: "Approved seller fee pricing for Seller Fees v2", told: "Told: Lucía, marketplace team", src: "CLICKUP" },
   },
 ];
-
-/** Bar color per need in the summary card / energy visual. */
-export const needColor: Record<Need["id"], string> = {
-  telecom: "#F26B5E",
-  board: "#F5B13D",
-  linkedin: "#F5B13D",
-  pricing: "#B4BCC5",
-};
 
 const prep: Record<string, MeetingPrep> = {
   standup: {
@@ -142,7 +148,7 @@ export const schedule: CalendarEvent[] = [
 export const calendarFooter = "Last meeting ends 16:30. Evening is free.";
 
 export const waiting: WaitingItem[] = [
-  { id: "w1", who: "Marco Ruiz", role: "CFO", what: "Q4 cash forecast with the YamaMi scenario", asked: "Asked Nov 16 · ClickUp", due: "Nov 20", s: "late", label: "3 days late" },
+  { id: "w1", who: "Marco Ruiz", role: "CFO", what: "Q4 cash forecast with the YamaMi scenario", asked: "Asked Nov 16 · ClickUp", due: "Nov 20", s: "late", label: "3 days late", energyLabel: "Cash forecast · late" },
   { id: "w2", who: "Kevin Marte", role: "CDS Support lead", what: "Root cause report for Caribbean Telecom #4821", asked: "Asked Sat · Freshdesk", due: "Today 12:00", s: "today", label: "Due today" },
   { id: "w3", who: "Andrés Soto", role: "Partnerships", what: "Legal redlines from the wallets partner", asked: "Asked Nov 19 · ClickUp", due: "Wed 25", s: "blocked", label: "Waiting on partner" },
   { id: "w4", who: "Luis Herrera", role: "Infrastructure", what: "Revised cutover plan after the circuit delay", asked: "Asked Nov 20 · ClickUp", due: "Wed 25", s: "ok", label: "On track" },
@@ -150,7 +156,7 @@ export const waiting: WaitingItem[] = [
   { id: "w6", who: "Lucía Gómez", role: "Marketplace", what: "One-page pricing summary for Seller Fees v2", asked: "Asked Nov 18 · ClickUp", due: "Delivered 07:05", s: "done", label: "✓ Delivered" },
 ];
 
-export const projects: Project[] = [
+const projects: (Project & { co: "CDS" | "YamaMi" })[] = [
   { id: "telecom", co: "CDS", s: "risk", name: "Caribbean Telecom renewal", line: "Open escalation is souring the renewal", pct: 40, next: "Renewal proposal · Dec 15", owner: "Ana Ruiz, CDS Ops", updated: "Updated 2h ago", latest: "Export failure traced to a firewall change on their side; fix is in testing. The client is more upset about weekend silence than the bug itself.", items: ["Hotfix to production · Tue", "Call with their CTO · needs you", "Renewal proposal draft · Fri"] },
   { id: "sla", co: "CDS", s: "ok", name: "Freshdesk SLA automation", line: "Auto-routing live for 60% of tickets", pct: 72, next: "Pilot with 3 clients · Dec 2", owner: "Kevin Marte, Support", updated: "Updated yesterday", latest: "Routing rules cut first-reply time by 22% in the test queue. Pilot clients confirmed.", items: ["Escalation rules · Wed", "Pilot kickoff · Dec 2"] },
   { id: "iso", co: "CDS", s: "ok", name: "ISO 27001 certification", line: "All controls documented", pct: 85, next: "External audit · Dec 9", owner: "Rosa Peña, Compliance", updated: "Updated Friday", latest: "Internal pre-audit passed with two minor findings, both closed.", items: ["Auditor logistics · Nov 30", "Staff awareness session · Dec 4"] },
@@ -161,10 +167,17 @@ export const projects: Project[] = [
   { id: "wallets", co: "YamaMi", s: "ok", name: "Local wallets partnership", line: "Terms agreed, legal reviewing", pct: 20, next: "Contract signing · Nov 30", owner: "Andrés Soto, Partnerships", updated: "Updated Thursday", latest: "Partner accepted our revenue-share terms. Legal redlines expected Wednesday.", items: ["Legal redlines · Wed", "Signing · Nov 30"] },
 ];
 
-export const projectGroups = [
+const RANK = { risk: 0, you: 1, watch: 2, ok: 3 } as const;
+export const projectGroups: BriefData["projectGroups"] = [
   { co: "CDS" as const, label: "Caribglobal Data Services" },
   { co: "YamaMi" as const, label: "YamaMi" },
-];
+].map((g) => ({
+  label: g.label,
+  items: projects
+    .filter((p) => p.co === g.co)
+    .sort((a, b) => RANK[a.s] - RANK[b.s])
+    .map(({ co: _co, ...p }) => p),
+}));
 
 export const clients: Client[] = [
   { name: "Caribbean Telecom", sector: "Telecom", value: "$180k", valueK: 180, date: "Dec 15", daysOut: 22, h: "risk", signal: "Escalation past SLA; 5 tickets in 3 days (usually 1 a week).", move: "Call their CTO this week; on your list today.", runway: { top: true, anchor: "c" } },
@@ -218,7 +231,7 @@ export const posts: Post[] = postRows.map(([id, m, d, dow, time, ch, title, by, 
 }));
 
 /** Other open threads that pull at attention (energy visual only). */
-export const otherPulls = [
+export const otherPulls: BriefData["otherPulls"] = [
   { c: "#F5B13D", t: "Data center" },
   { c: "#F5B13D", t: "App 2.0 bugs" },
   { c: "#F5B13D", t: "Banco del Sur" },
@@ -294,3 +307,20 @@ export const checks: Check[] = [
   { source: "LinkedIn", title: "Posting", verdict: "You and CDS are on pace. YamaMi is 2 behind; Sofía has both queued.", ok: false, metrics: [{ v: "2/2", k: "you" }, { v: "3/3", k: "CDS" }, { v: "1/3", k: "YamaMi" }] },
   { source: "Calendar", title: "This week", verdict: "14 meetings, 6 hours of focus protected. Thursday is light.", ok: true, metrics: [{ v: "14", k: "meetings" }, { v: "6h", k: "focus" }, { v: "Thu", k: "lightest" }] },
 ];
+
+/** The full sample brief — what the page shows when no integration is configured. */
+export const mockBrief: BriefData = {
+  needs,
+  waiting,
+  waitingPills: [
+    { t: "● 1 late", tone: "red" },
+    { t: "2 due by Wednesday", tone: "amber" },
+    { t: "2 on track", tone: "mint" },
+    { t: "✓ 1 delivered", tone: "grey" },
+  ],
+  projectGroups,
+  pastDecisions,
+  checks,
+  sources,
+  otherPulls,
+};

@@ -1,16 +1,19 @@
 /** Pure helpers that derive display values from brief state. */
-import { pastDecisions } from "@/data/brief";
-import type { Decision, NeedId, NeedStatus } from "@/data/types";
+import type { Decision, Need, NeedStatus } from "@/data/types";
 
+/** Decisions made in this session (marked done / approvals), newest first. */
 export function todayDecisions(
-  needStatus: Partial<Record<NeedId, NeedStatus>>,
+  needs: Need[],
+  needStatus: Record<string, NeedStatus | undefined>,
   postDecision: Record<string, "approved" | "changes" | undefined>,
 ): Decision[] {
   const out: Decision[] = [];
-  const done = (id: NeedId) => needStatus[id] === "done";
-  if (done("pricing")) out.push({ day: "TODAY", what: "Approved seller fee pricing for Seller Fees v2", told: "Told: Lucía, marketplace team", src: "CLICKUP" });
-  if (done("linkedin")) out.push({ day: "TODAY", what: "Approved your LinkedIn post on Caribbean data sovereignty", told: "Told: Sofía", src: "LINKEDIN" });
-  if (done("telecom")) out.push({ day: "TODAY", what: "Handled the Caribbean Telecom escalation", told: "Told: Ana, Kevin", src: "FRESHDESK" });
+  // Reverse list order matches the design (last needs first).
+  for (const n of [...needs].reverse()) {
+    if (needStatus[n.id] !== "done" || n.decision === null) continue;
+    const d = n.decision ?? { what: `Done: ${n.title}`, told: "", src: n.source.split(" · ")[0].toUpperCase() };
+    out.push({ day: "TODAY", ...d });
+  }
   const vals = Object.values(postDecision);
   const approved = vals.filter((v) => v === "approved").length;
   const changes = vals.filter((v) => v === "changes").length;
@@ -19,8 +22,13 @@ export function todayDecisions(
   return out;
 }
 
-export function allDecisions(...args: Parameters<typeof todayDecisions>) {
-  return [...todayDecisions(...args), ...pastDecisions];
+export function allDecisions(
+  needs: Need[],
+  past: Decision[],
+  needStatus: Record<string, NeedStatus | undefined>,
+  postDecision: Record<string, "approved" | "changes" | undefined>,
+) {
+  return [...todayDecisions(needs, needStatus, postDecision), ...past];
 }
 
 /** Decimal hours → "HH:MM". */

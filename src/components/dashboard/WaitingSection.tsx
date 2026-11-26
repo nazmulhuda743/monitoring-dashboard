@@ -1,6 +1,5 @@
 "use client";
 
-import { waiting } from "@/data/brief";
 import type { WaitState } from "@/data/types";
 import { T, type Tone } from "@/lib/tones";
 import { Pill, PillRow, Section, SectionHeader } from "@/components/ui/primitives";
@@ -9,25 +8,36 @@ import { useBrief } from "./BriefProvider";
 const STATE_TONE: Record<WaitState, Tone> = { late: T.red, today: T.amber, blocked: T.amber, ok: T.mint, done: T.mint };
 
 export function WaitingSection() {
-  const { nudged, nudge } = useBrief();
+  const { data, nudged, nudge } = useBrief();
+  const { waiting } = data;
+  const count = (s: WaitState[]) => waiting.filter((w) => s.includes(w.s)).length;
+  const pills =
+    data.waitingPills ??
+    ([
+      count(["late"]) && { t: `● ${count(["late"])} late`, tone: "red" as const },
+      count(["today", "blocked"]) && { t: `${count(["today", "blocked"])} due soon`, tone: "amber" as const },
+      count(["ok"]) && { t: `${count(["ok"])} on track`, tone: "mint" as const },
+      count(["done"]) && { t: `✓ ${count(["done"])} delivered`, tone: "grey" as const },
+    ].filter(Boolean) as { t: string; tone: "red" | "amber" | "mint" | "grey" }[]);
   return (
     <Section id="a-waiting">
       <SectionHeader num="02" title="Waiting on others" meta="What you handed off, from ClickUp tasks you assigned and Freshdesk tickets you follow" />
-      <PillRow
-        pills={[
-          { t: "● 1 late", tone: T.red },
-          { t: "2 due by Wednesday", tone: T.amber },
-          { t: "2 on track", tone: T.mint },
-          { t: "✓ 1 delivered", tone: T.grey },
-        ]}
-      />
+      <PillRow pills={pills} />
+      {waiting.length === 0 && <p className="m-0 text-[14px] text-muted-2">Nothing handed off right now.</p>}
+      {waiting.length > 0 && (
       <div className="glass px-5 pt-0.5 pb-1">
         {waiting.map((w, i) => {
           const canNudge = (w.s === "late" || w.s === "blocked") && !nudged[w.id];
           return (
             <div key={w.id} className={`flex flex-col gap-[9px] py-3.5 ${i ? "row-divider" : ""}`}>
               <div className="flex items-start justify-between gap-3">
-                <span className="text-[14.5px] leading-[1.4] font-semibold text-pretty text-fg">{w.what}</span>
+                {w.url ? (
+                  <a href={w.url} target="_blank" rel="noreferrer" className="text-[14.5px] leading-[1.4] font-semibold text-pretty text-fg! hover:underline">
+                    {w.what}
+                  </a>
+                ) : (
+                  <span className="text-[14.5px] leading-[1.4] font-semibold text-pretty text-fg">{w.what}</span>
+                )}
                 <Pill tone={STATE_TONE[w.s]}>{w.label}</Pill>
               </div>
               <div className="flex flex-wrap items-center justify-between gap-x-3.5 gap-y-2">
@@ -53,6 +63,7 @@ export function WaitingSection() {
           );
         })}
       </div>
+      )}
     </Section>
   );
 }

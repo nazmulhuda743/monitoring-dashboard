@@ -10,8 +10,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { needs, posts } from "@/data/brief";
-import type { Need, NeedId, NeedStatus, Post, PostStatus } from "@/data/types";
+import { posts } from "@/data/brief";
+import type { BriefData, Need, NeedId, NeedStatus, Post, PostStatus } from "@/data/types";
 
 type Dict<V> = Record<string, V | undefined>;
 type Flags = Record<string, boolean>;
@@ -31,6 +31,8 @@ interface BriefState {
 }
 
 interface BriefContext extends BriefState {
+  /** Integration data (live or sample), loaded on the server. */
+  data: BriefData;
   active: Need[];
   setNeed: (id: NeedId, v: NeedStatus | undefined) => void;
   setPost: (id: string, v: "approved" | "changes" | undefined) => void;
@@ -55,7 +57,7 @@ export function useBrief() {
 
 const toggle = (f: Flags, id: string): Flags => ({ ...f, [id]: !f[id] });
 
-export function BriefProvider({ children }: { children: ReactNode }) {
+export function BriefProvider({ data, children }: { data: BriefData; children: ReactNode }) {
   const [s, setS] = useState<BriefState>({
     needStatus: {},
     postDecision: {},
@@ -83,7 +85,7 @@ export function BriefProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const active = useMemo(() => needs.filter((n) => !s.needStatus[n.id]), [s.needStatus]);
+  const active = useMemo(() => data.needs.filter((n) => !s.needStatus[n.id]), [data.needs, s.needStatus]);
 
   const goStart = useCallback(() => {
     clearTimeout(loopTimer.current);
@@ -97,6 +99,7 @@ export function BriefProvider({ children }: { children: ReactNode }) {
   const value = useMemo<BriefContext>(
     () => ({
       ...s,
+      data,
       active,
       setNeed: (id, v) => setS((p) => ({ ...p, needStatus: { ...p.needStatus, [id]: v } })),
       setPost: (id, v) => setS((p) => ({ ...p, postDecision: { ...p.postDecision, [id]: v } })),
@@ -114,7 +117,7 @@ export function BriefProvider({ children }: { children: ReactNode }) {
       goStart,
       postStatus: (p) => s.postDecision[p.id] ?? p.base,
     }),
-    [s, active, goStart],
+    [s, data, active, goStart],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

@@ -1,6 +1,6 @@
 "use client";
 
-import { calendarFooter, needs, schedule } from "@/data/brief";
+import { calendarFooter, schedule } from "@/data/brief";
 import { T } from "@/lib/tones";
 import { Field, Pill, Section, SectionHeader } from "@/components/ui/primitives";
 import { useBrief } from "./BriefProvider";
@@ -65,7 +65,8 @@ function CalendarCard() {
 }
 
 export function NeedsSection() {
-  const { active, needStatus, setNeed, flash } = useBrief();
+  const { data, active, needStatus, setNeed, flash } = useBrief();
+  const needs = data.needs;
   const doneN = needs.filter((n) => needStatus[n.id] === "done").length;
   const laterN = needs.filter((n) => needStatus[n.id] === "later").length;
   const meta = doneN || laterN ? `${doneN} done · ${laterN} later · ${active.length} left` : "Ordered by urgency · from Freshdesk, ClickUp, LinkedIn and your calendar";
@@ -95,7 +96,13 @@ export function NeedsSection() {
                 <h3 className="m-0 mt-1 text-[20px] leading-[1.3] font-semibold tracking-[-.025em] text-pretty">{n.title}</h3>
                 <p className="m-0 max-w-[68ch] text-[14px] leading-[1.6] text-pretty text-muted">{n.why}</p>
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
-                  <button className="btn-primary">{n.cta}</button>
+                  {n.url ? (
+                    <a className="btn-primary text-mint-ink! hover:text-mint-ink!" href={n.url} target="_blank" rel="noreferrer">
+                      {n.cta}
+                    </a>
+                  ) : (
+                    <button className="btn-primary">{n.cta}</button>
+                  )}
                   <button className="btn-outline" onClick={() => setNeed(n.id, "done")}>Mark done</button>
                   <button className="btn-text" onClick={() => setNeed(n.id, "later")}>Later today</button>
                 </div>

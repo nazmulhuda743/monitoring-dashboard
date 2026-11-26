@@ -7,14 +7,17 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "compare": "node scripts/compare-design.cjs",
-    "shoot:mobile": "node scripts/shoot-mobile.cjs"
+    "shoot:mobile": "node scripts/shoot-mobile.cjs",
+    "test": "vitest run",
+    "fake:clickup": "node --no-warnings src/test/fake-clickup.ts"
   },
   "dependencies": {
     "next": "16.4.6",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "4.3.3",
@@ -26,6 +29,7 @@
     "pixelmatch": "^5.3.0",
     "pngjs": "^7.0.0",
     "tailwindcss": "4.3.3",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.7"
   }
 }
