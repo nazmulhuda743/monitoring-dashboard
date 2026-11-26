@@ -148,7 +148,8 @@ Section anchors (used by nav + scroll-spy): `#top #a-needs #a-waiting
   (`class Component` at the bottom holds the original logic).
 - Keep data out of components: add/modify fields in `src/data/types.ts` +
   `src/data/brief.ts`; components consume them.
-- Git: develop on the branch the session specifies; small, descriptive commits.
+- Git: **`main` is production** (Vercel deploys it). The user approved pushing
+  finished, verified work straight to `main`; small, descriptive commits.
 - **Never put AI/assistant names in anything pushed to GitHub** — no
   "Co-Authored-By"/session trailers in commit messages, no assistant name as
   git author, no mentions in code, comments or docs. Commit as
