@@ -308,6 +308,50 @@ export const checks: Check[] = [
   { source: "Calendar", title: "This week", verdict: "14 meetings, 6 hours of focus protected. Thursday is light.", ok: true, metrics: [{ v: "14", k: "meetings" }, { v: "6h", k: "focus" }, { v: "Thu", k: "lightest" }] },
 ];
 
+/** Section 06 sample — verbatim from design v2 (Bionda_Dashboard_v2). */
+const liRaw: [string, string, string, number, number, number, number, number, number][] = [
+  ["Where your data lives: Caribbean data sovereignty", "Wed 18 Nov", "Carousel", 14200, 486, 72, 61, 7.8, 18],
+  ["Case study: Isla Seguros cut reporting time by 40%", "Tue 10 Nov", "Image", 9800, 312, 41, 28, 6.1, 10],
+  ["Meet the team behind 98% on-time support", "Wed 4 Nov", "Video", 8100, 264, 38, 12, 5.2, 4],
+  ["CDS at Caribbean Tech Summit 2026", "Fri 30 Oct", "Image", 6400, 158, 14, 9, 3.4, -1],
+  ["Cloud backup checklist for small businesses", "Fri 13 Nov", "Document", 5200, 96, 7, 15, 2.6, 13],
+  ["Q4 product update", "Fri 6 Nov", "Text", 3100, 41, 3, 2, 1.3, 6],
+];
+export const linkedinSample: BriefData["linkedin"] = {
+  page: { name: "Caribglobal Data Services", label: "CDS", url: "https://www.linkedin.com/company/", followers: 8412, growthPct: 4.8 },
+  syncedAt: "06:38",
+  lead: "Growing, and faster.",
+  summary: "CDS gained 387 followers in 30 days, 40% more than the month before. Engagement is up to 4.6%, carried by the data sovereignty carousel. One gap: only 6 of 8 planned posts went out.",
+  kpis: [
+    { k: "Followers", v: "8,412", d: "+387", dk: "+4.8% in 30 days", tone: "mint" },
+    { k: "Impressions", v: "52.4k", d: "+22%", dk: "vs 43.0k", tone: "mint" },
+    { k: "Engagement rate", v: "4.6%", d: "+1.2 pts", dk: "vs 3.4%", tone: "mint" },
+    { k: "Posts published", v: "6", d: "2 short", dk: "of 8 planned", tone: "amber" },
+  ],
+  weeks: [48, 52, 61, 44, 58, 70, 66, 82, 74, 91, 118, 104].map((v, i) => ({ v, l: ["Sep 7", "", "", "Sep 28", "", "", "Oct 19", "", "", "Nov 9", "", "Nov 23"][i] })),
+  pace: { last: 387, before: 276 },
+  works: [
+    { t: "Real client results win.", d: "The Isla Seguros case study got 2× the engagement of the summit and product announcements." },
+    { t: "Show, don’t tell.", d: "Carousels and video averaged 6.5% engagement. The text-only update got 1.3%." },
+    { t: "Mid-week beats Friday.", d: "The top 3 went out Tue–Wed mornings. Friday posts averaged 2.4%." },
+  ],
+  next: "2 of 3 CDS posts fit the pattern. The Friday hiring post may get half the reach; Tue 8 Dec would suit it better.",
+  bestLabel: "Best this quarter",
+  avgRate: 4.6,
+  posts: liRaw.map(([title, date, format, impressions, reactions, comments, reposts, rate, dayOfNov], i) => ({
+    id: `li-sample-${i}`,
+    title,
+    date,
+    format,
+    publishedAt: Date.UTC(2026, 10, dayOfNov, 13),
+    impressions,
+    reactions,
+    comments,
+    reposts,
+    rate,
+  })),
+};
+
 /** The full sample brief — what the page shows when no integration is configured. */
 export const mockBrief: BriefData = {
   needs,
@@ -323,4 +367,5 @@ export const mockBrief: BriefData = {
   checks,
   sources,
   otherPulls,
+  linkedin: linkedinSample,
 };

@@ -57,7 +57,8 @@ export async function buildBrief(now: number, env: Record<string, string | undef
     try {
       const r = await loadLinkedIn(li, getStore(env), now);
       if (r.summary) {
-        data.linkedin = r.summary;
+        // Live page analytics replace the sample section 06.
+        data.linkedin = { ...r.summary, syncedAt: r.state === "live" ? formatBusinessTime(new Date(r.fetchedAt)) : r.summary.syncedAt };
         const check = mapLinkedInCheck(r.summary, now);
         data.checks = data.checks.map((c) => (c.source === "LinkedIn" ? check : c));
       }

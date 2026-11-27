@@ -23,6 +23,8 @@ export interface LinkedInConfig {
   oauthUrl: string;
   /** How often to call LinkedIn at most (minutes). Development tier allows ~500 calls/day. */
   refreshMinutes: number;
+  /** LINKEDIN_PAGE_LABEL — short name in "<label> on LinkedIn" (default: initials, e.g. "CDS"). */
+  pageLabel?: string;
 }
 
 export const DEFAULT_LINKEDIN_VERSION = "202611";
@@ -41,6 +43,7 @@ export function linkedInConfigFromEnv(env: Record<string, string | undefined> = 
     apiUrl: (env.LINKEDIN_API_URL?.trim() || "https://api.linkedin.com/rest").replace(/\/$/, ""),
     oauthUrl: (env.LINKEDIN_OAUTH_URL?.trim() || "https://www.linkedin.com/oauth/v2").replace(/\/$/, ""),
     refreshMinutes: Number(env.LINKEDIN_REFRESH_MINUTES) || 30,
+    pageLabel: env.LINKEDIN_PAGE_LABEL?.trim() || undefined,
   };
 }
 

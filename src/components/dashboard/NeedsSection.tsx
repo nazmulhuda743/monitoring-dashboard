@@ -6,7 +6,7 @@ import { Field, Pill, Section, SectionHeader } from "@/components/ui/primitives"
 import { useBrief } from "./BriefProvider";
 
 const CARD_SHADOW = "inset 0 1px 0 rgba(255,255,255,.055),0 30px 70px -40px rgba(0,0,0,.85)";
-const FLASH_SHADOW = "0 0 0 2px rgba(31,224,160,.7),0 0 70px -10px rgba(31,224,160,.65)";
+const FLASH_SHADOW = "0 0 0 2px #1FE0A0,0 0 90px -6px rgba(31,224,160,.75),inset 0 0 70px -24px rgba(31,224,160,.45)";
 
 function CalendarCard() {
   const { meetingOpen, toggleMeeting } = useBrief();
@@ -82,7 +82,8 @@ export function NeedsSection() {
             return (
               <article
                 key={n.id}
-                className="glass flex flex-col gap-2 overflow-hidden px-6 py-[22px] transition-[border-color,box-shadow] duration-300 hover:border-white/14"
+                id={`need-${i}`}
+                className="scroll-mt-[110px] glass flex flex-col gap-2 overflow-hidden px-6 py-[22px] transition-[border-color,box-shadow] duration-300 hover:border-white/14"
                 style={{ boxShadow: i === 0 && flash ? FLASH_SHADOW : CARD_SHADOW, transitionDuration: ".3s,.6s" }}
               >
                 <span className="absolute top-0 right-6 left-6 h-px" style={{ background: `linear-gradient(90deg,transparent,${tone.fg},transparent)` }} />

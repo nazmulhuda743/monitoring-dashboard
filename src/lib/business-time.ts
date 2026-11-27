@@ -115,3 +115,11 @@ export function greetingFor(hour: number): "morning" | "afternoon" | "evening" {
   if (hour >= 12 && hour < 17) return "afternoon";
   return "evening";
 }
+
+/** "Wed 18 Nov" in Curaçao. */
+export const dayDateMonth = (d: Date | number) => {
+  const t = toBusinessTime(new Date(d));
+  return `${SHORT_DAYS[t.weekdayIdx]} ${t.day} ${SHORT_MONTHS[t.month - 1]}`;
+};
+/** "Wednesday" in Curaçao. */
+export const weekdayOf = (d: Date | number) => weekdayName(toBusinessTime(new Date(d)).weekdayIdx);

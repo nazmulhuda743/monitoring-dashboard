@@ -23,6 +23,22 @@ export interface LIPost {
   createdAt?: number;
   lifecycleState?: string;
   visibility?: string;
+  /** media / multiImage / article / poll / … (absent for text-only posts) */
+  content?: {
+    media?: { id?: string };
+    multiImage?: unknown;
+    article?: unknown;
+    poll?: unknown;
+    carousel?: unknown;
+    celebration?: unknown;
+  };
+  reshareContext?: unknown;
+}
+
+export interface LIDay {
+  /** Epoch ms of the day/week start (UTC) */
+  start: number;
+  stats: LIShareStats;
 }
 
 export class LinkedInError extends Error {
@@ -97,12 +113,23 @@ export function createLinkedInClient(opts: { accessToken: string; apiVersion: st
     },
 
     /** Page-wide organic stats per day between start (incl.) and end (excl.), epoch ms. */
-    async pageStatsByDay(id: string, start: number, end: number): Promise<LIShareStats[]> {
-      const r = await get<{ elements: { totalShareStatistics: LIShareStats }[] }>(
+    async pageStatsByDay(id: string, start: number, end: number): Promise<LIDay[]> {
+      const r = await get<{ elements: { timeRange?: { start: number }; totalShareStatistics: LIShareStats }[] }>(
         `/organizationalEntityShareStatistics?q=organizationalEntity&organizationalEntity=${enc(orgUrn(id))}` +
           `&timeIntervals=(timeRange:(start:${start},end:${end}),timeGranularityType:DAY)`,
       );
-      return r.elements.map((e) => e.totalShareStatistics);
+      return r.elements.map((e) => ({ start: e.timeRange?.start ?? 0, stats: e.totalShareStatistics }));
+    },
+
+    /** New followers per week (organic + paid) — LinkedIn has data up to 2 days ago. */
+    async followerGainsByWeek(id: string, start: number, end: number): Promise<{ start: number; gain: number }[]> {
+      const r = await get<{ elements: { timeRange?: { start: number }; followerGains?: { organicFollowerGain?: number; paidFollowerGain?: number } }[] }>(
+        `/organizationalEntityFollowerStatistics?q=organizationalEntity&organizationalEntity=${enc(orgUrn(id))}` +
+          `&timeIntervals=(timeRange:(start:${start},end:${end}),timeGranularityType:WEEK)`,
+      );
+      return r.elements
+        .map((e) => ({ start: e.timeRange?.start ?? 0, gain: (e.followerGains?.organicFollowerGain ?? 0) + (e.followerGains?.paidFollowerGain ?? 0) }))
+        .sort((a, b) => a.start - b.start);
     },
 
     async followers(id: string): Promise<number | null> {

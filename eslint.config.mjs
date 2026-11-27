@@ -16,6 +16,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Approved design exports (third-party runtime), not our code.
+    "design/**",
   ]),
 ]);
 

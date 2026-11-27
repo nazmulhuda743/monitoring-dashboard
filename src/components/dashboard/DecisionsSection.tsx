@@ -9,7 +9,7 @@ export function DecisionsSection() {
   const decisions = allDecisions(data.needs, data.pastDecisions, needStatus, postDecision);
   return (
     <Section id="a-decisions">
-      <SectionHeader num="07" title="Decided this week" meta="So you don’t have to remember it. Each decision was shared with the people it affects." />
+      <SectionHeader num="08" title="Decided this week" meta="So you don’t have to remember it. Each decision was shared with the people it affects." />
       <div className="glass px-5 pt-0.5 pb-1">
         {decisions.map((d, i) => (
           <div key={`${d.day}-${d.what}`} className={`flex flex-wrap items-baseline gap-x-4 gap-y-1.5 py-[13px] ${i ? "row-divider" : ""}`}>

@@ -90,10 +90,11 @@ export function BriefProvider({ data, children }: { data: BriefData; children: R
   const goStart = useCallback(() => {
     clearTimeout(loopTimer.current);
     clearTimeout(flashTimer.current);
-    setS((p) => ({ ...p, focus: true, flash: true }));
-    const el = document.getElementById(active.length ? "a-needs" : "a-projects");
-    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - (window.innerWidth < 1024 ? 76 : 24), behavior: "smooth" });
-    flashTimer.current = setTimeout(() => setS((p) => ({ ...p, flash: false })), 2800);
+    // v2: scroll to the first task card itself (110px below the top) and glow it.
+    setS((p) => ({ ...p, focus: true, flash: active.length > 0 }));
+    const el = document.getElementById(active.length ? "need-0" : "a-projects") ?? document.getElementById("a-needs");
+    if (el) window.scrollTo({ top: Math.max(0, el.getBoundingClientRect().top + window.scrollY - 110), behavior: "smooth" });
+    flashTimer.current = setTimeout(() => setS((p) => ({ ...p, flash: false })), 3000);
   }, [active.length]);
 
   const value = useMemo<BriefContext>(

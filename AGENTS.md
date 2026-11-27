@@ -22,9 +22,13 @@ from **Freshdesk, ClickUp, LinkedIn and Google Calendar** and answers: what
 needs me today, what am I waiting on, how are projects / key clients / content /
 support doing, what did I decide, and is everything else fine.
 
-- **Approved design:** `design/Bionda_Dashboard.html` (bundled export — open in
-  a browser). Readable source of that design (markup + logic + data):
-  `design/design-source.html`. When in doubt about a value, grep it there.
+- **Approved design (current): v2** — `design/Bionda_Dashboard_v2.dc.html`
+  (readable source; opens in a browser next to `design/support.js`, the design
+  tool runtime extracted from the v1 export). v2 = v1 + section 06 "CDS on
+  LinkedIn" (+ sections renumbered 07–09, sidebar item, "Start" scrolls to the
+  first task card at -110px with a stronger glow). v1 for reference:
+  `design/Bionda_Dashboard.html` (bundle) + `design/design-source.html`.
+  When in doubt about a value, grep the v2 file.
 - **Phase 1 (done):** pixel-match the design at 1440px desktop, using mock data.
 - **Phase 2 (done):** responsive — tablet and phone layouts (no design for these; ours).
 - **Phase 3 (in progress):** live integrations. **ClickUp is live** (token in
@@ -96,12 +100,14 @@ src/components/dashboard/     one file per page block:
   SummaryCards    3 summary cards + business pulse strip
   NeedsSection    01 needs-you cards + today's calendar w/ meeting prep
   WaitingSection  02 · ProjectsSection 03 · ClientsSection 04 (renewal runway)
-  ContentSection  05 week list / December month grid · SupportSection 06
-  DecisionsSection 07 · EverythingElseSection 08 + closing line
+  ContentSection  05 week list / December month grid
+  LinkedInSection 06 "<page> on LinkedIn": KPIs, followers/week chart, what's working, post ranking
+  SupportSection 07 · DecisionsSection 08 · EverythingElseSection 09 + closing line
 ```
 
 Section anchors (used by nav + scroll-spy): `#top #a-needs #a-waiting
-#a-projects #a-clients #a-content #a-support #a-decisions #a-else`.
+#a-projects #a-clients #a-content #a-linkedin #a-support #a-decisions #a-else`;
+need cards also have `#need-0…` (the "Start" button scrolls to `#need-0`).
 
 ## Design rules (important — these are what keep it pixel-exact)
 
@@ -148,8 +154,8 @@ Section anchors (used by nav + scroll-spy): `#top #a-needs #a-waiting
 ## How to work here
 
 - Before finishing any UI change: `npm run lint && npm run typecheck && npm run build`,
-  then `npm start` + `npm run compare` + `npm run shoot:mobile` (look at the sheets). Expected: same total height as the design
-  (9289px at 1440), sections within ±1px, pixel diff < 1%. Look at
+  then `npm start` + `npm run compare` + `npm run shoot:mobile` (look at the sheets). Expected vs design v2:
+  total height 10701 (app 10700), sections within ±1px, pixel diff < 1%. Look at
   `.compare/diff.png` / a crop for anything new.
 - Interactive parity was verified by clicking the same controls on both pages
   (Mark done, Later today, Nudge, Approve, Ask for changes, project & meeting
@@ -197,11 +203,15 @@ Section anchors (used by nav + scroll-spy): `#top #a-needs #a-waiting
   2026-11-27 (legal name Caribglobal Data Services B.V., Caracasbaaiweg 199-A,
   Willemstad, Curaçao). Flow: sidebar "connect" → /api/linkedin/connect →
   LinkedIn → /api/linkedin/callback → token in store (TOFU: later reconnects
-  must be admin of the same page, or LINKEDIN_ORGANIZATION_ID). Data: last 10
-  page posts + lifetime stats, 7-day page totals, followers → section 05
-  "Published on …" panel (only when connected) + "Posting" check card.
-  LinkedIn is called at most every 30 min (snapshot in store) ≈ 240 calls/day
-  < 500 dev-tier limit. Access tokens last 60 days; refresh tokens may not be
+  must be admin of the same page, or LINKEDIN_ORGANIZATION_ID). Data → section
+  06 (sample from design v2 until connected): followers (networkSizes), weekly
+  follower gains ×12 (follower statistics, WEEK), daily page stats ×60 days
+  (share statistics, DAY) for "last 30 vs the 30 before", page posts (≤100,
+  published, last 60 days) + per-post lifetime stats and format. Summary
+  sentence and "What's working" insights are computed from the numbers
+  (`adapt.ts`); the "Next week" tip only exists in the sample (needs a content
+  plan). Also the "Posting" check card. ~8 calls per refresh, at most every 30
+  min (snapshot in store) ≈ 384 calls/day < 500 dev-tier limit. Access tokens last 60 days; refresh tokens may not be
   granted → sidebar shows "reconnect" a week before expiry.
 
 ## Known, accepted differences from the design export

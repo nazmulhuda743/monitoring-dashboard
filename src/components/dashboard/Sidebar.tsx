@@ -6,7 +6,7 @@ import { allDecisions } from "@/lib/derive";
 import { Eyebrow } from "@/components/ui/primitives";
 import { useBrief, weekPosts } from "./BriefProvider";
 
-const SECTION_IDS = ["a-needs", "a-waiting", "a-projects", "a-clients", "a-content", "a-support", "a-decisions", "a-else"];
+const SECTION_IDS = ["a-needs", "a-waiting", "a-projects", "a-clients", "a-content", "a-linkedin", "a-support", "a-decisions", "a-else"];
 
 /** Scroll-spy: which section is currently in the top 30% of the viewport. */
 function useActiveSection() {
@@ -78,6 +78,7 @@ function NavPanel({ onNavigate, className = "" }: { onNavigate?: () => void; cla
   const readyWeek = weekPosts.filter((p) => postStatus(p) === "ready").length;
   const decisionCount = allDecisions(data.needs, data.pastDecisions, needStatus, postDecision).length;
   const projectCount = data.projectGroups.reduce((n, g) => n + g.items.length, 0);
+  const growth = data.linkedin.page.growthPct;
 
   return (
     <nav
@@ -113,6 +114,13 @@ function NavPanel({ onNavigate, className = "" }: { onNavigate?: () => void; cla
       <NavItem href="#a-projects" label="Projects" count={projectCount} countColor="#6B7480" on={cur === "a-projects"} />
       <NavItem href="#a-clients" label="Key clients" count={5} countColor="#6B7480" on={cur === "a-clients"} />
       <NavItem href="#a-content" label="Content to approve" count={readyWeek} countColor="#6FA4FA" on={cur === "a-content"} />
+      <NavItem
+        href="#a-linkedin"
+        label={`${data.linkedin.page.label} on LinkedIn`}
+        count={growth == null ? undefined : `${growth >= 0 ? "+" : ""}${growth.toFixed(1)}%`}
+        countColor={growth != null && growth < 0 ? "#F26B5E" : "#1FE0A0"}
+        on={cur === "a-linkedin"}
+      />
       <NavItem href="#a-support" label="Support team" count="96%" countColor="#1FE0A0" on={cur === "a-support"} />
       <Group>Peace of mind</Group>
       <NavItem href="#a-decisions" label="Decided this week" count={decisionCount} countColor="#6B7480" on={cur === "a-decisions"} />

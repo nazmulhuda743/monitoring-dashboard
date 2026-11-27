@@ -6,6 +6,7 @@ import { DecisionsSection } from "@/components/dashboard/DecisionsSection";
 import { EnergySection } from "@/components/dashboard/EnergySection";
 import { EverythingElseSection } from "@/components/dashboard/EverythingElseSection";
 import { Hero } from "@/components/dashboard/Hero";
+import { LinkedInSection } from "@/components/dashboard/LinkedInSection";
 import { NeedsSection } from "@/components/dashboard/NeedsSection";
 import { ProjectsSection } from "@/components/dashboard/ProjectsSection";
 import { Sidebar } from "@/components/dashboard/Sidebar";
@@ -34,6 +35,7 @@ export default async function MorningBrief() {
               <ProjectsSection />
               <ClientsSection />
               <ContentSection />
+              <LinkedInSection />
               <SupportSection />
               <DecisionsSection />
               <EverythingElseSection checks={data.checks} />

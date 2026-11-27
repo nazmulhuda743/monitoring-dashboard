@@ -194,30 +194,53 @@ export interface SourceInfo {
   action?: { label: string; href: string; hint: string };
 }
 
-export interface LinkedInPost {
+export interface LinkedInKpi {
+  k: string; // "Followers"
+  v: string; // "8,412"
+  d: string; // "+387"
+  dk: string; // "+4.8% in 30 days"
+  tone: ToneName;
+}
+
+export interface LinkedInRow {
   id: string;
-  url: string;
-  text: string;
-  /** Epoch ms */
+  title: string;
+  /** "Wed 18 Nov" (Curaçao) */
+  date: string;
+  /** "Carousel" · "Image" · "Video" · "Document" · "Text" · … */
+  format: string;
+  url?: string;
+  /** Epoch ms (for the 7-day "Posting" card) */
   publishedAt: number;
-  /** Curaçao "MON" / "24" for the date column */
-  dow: string;
-  day: string;
   impressions: number;
   reactions: number;
   comments: number;
-  shares: number;
-  clicks: number;
-  /** 0–1, LinkedIn's engagement rate for the post */
-  engagement: number;
+  reposts: number;
+  /** Engagement rate in percent, e.g. 7.8 */
+  rate: number;
 }
 
+/** Section 06 "<page> on LinkedIn": company page analytics, last 30 days vs the 30 before. */
 export interface LinkedInSummary {
-  page: { name: string; url: string; followers: number | null };
-  /** Most recent posts first (max ~10). */
-  posts: LinkedInPost[];
-  /** Totals for posts published in the last 7 days. */
-  week: { posts: number; impressions: number; reactions: number; comments: number; shares: number; engagement: number };
+  page: { name: string; label: string; url: string; followers: number | null; growthPct: number | null };
+  /** Curaçao "HH:MM" of the last LinkedIn sync. */
+  syncedAt: string;
+  /** "Growing, and faster." + the rest of the sentence. */
+  lead: string;
+  summary: string;
+  kpis: LinkedInKpi[];
+  /** New followers per week, oldest first (12); label "" = no axis label. */
+  weeks: { v: number; l: string }[];
+  /** Last 4 weeks vs the 4 before. */
+  pace: { last: number; before: number };
+  works: { t: string; d: string }[];
+  /** Optional tip about upcoming posts (needs a content plan). */
+  next?: string;
+  /** "Best this quarter" / "Best this month" */
+  bestLabel: string;
+  /** Page engagement rate (percent) — posts at/above it are mint. */
+  avgRate: number;
+  posts: LinkedInRow[];
 }
 
 /** Everything the page renders that comes from an integration. */
@@ -232,6 +255,6 @@ export interface BriefData {
   sources: SourceInfo[];
   /** Extra threads in the energy visual (after needs, posts and late hand-offs). */
   otherPulls: Pull[];
-  /** Live LinkedIn page data, when connected. */
-  linkedin?: LinkedInSummary;
+  /** Section 06: LinkedIn company page analytics (sample until connected). */
+  linkedin: LinkedInSummary;
 }

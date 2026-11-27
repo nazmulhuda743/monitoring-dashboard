@@ -8,8 +8,8 @@
  * prints each section's top/height side by side, and writes full-page
  * screenshots + a pixel diff to .compare/ (gitignored).
  *
- * Expected today: identical total height, sections within ±1px, <1% pixels
- * different (sub-pixel text anti-aliasing only).
+ * Expected today (v2, 1440px): total height 10701, sections within ±1px,
+ * <1% pixels different (sub-pixel text anti-aliasing only).
  *
  * Optional: node scripts/compare-design.cjs <y> <h>  → also writes
  * .compare/crop.png showing original | ours | diff for that vertical band.
@@ -22,9 +22,11 @@ const pixelmatch = require("pixelmatch");
 
 const ROOT = path.resolve(__dirname, "..");
 const OUT = path.join(ROOT, ".compare");
-const DESIGN = "file://" + path.join(ROOT, "design/Bionda_Dashboard.html");
+// Current approved design: v2 (adds section 06 "CDS on LinkedIn"). It loads
+// design/support.js (the design tool runtime, extracted from the v1 export).
+const DESIGN = "file://" + path.join(ROOT, process.env.DESIGN_FILE || "design/Bionda_Dashboard_v2.dc.html");
 const APP = process.env.APP_URL || "http://localhost:3000/";
-const SECTIONS = ["top", "a-needs", "a-waiting", "a-projects", "a-clients", "a-content", "a-support", "a-decisions", "a-else"];
+const SECTIONS = ["top", "a-needs", "a-waiting", "a-projects", "a-clients", "a-content", "a-linkedin", "a-support", "a-decisions", "a-else"];
 
 async function grab(browser, url, tag) {
   // The design export reads the device clock, our app reads Curaçao time:

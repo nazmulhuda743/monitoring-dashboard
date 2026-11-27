@@ -15,16 +15,26 @@ export const LI_NOW = Date.parse("2026-11-23T13:37:00Z"); // Mon 09:37 Curaçao
 const D = 86400000;
 
 export const LI_POSTS = [
-  { id: "urn:li:share:7001", commentary: "ISO 27001: why we are doing it {hashtag|\\#|security}", publishedAt: LI_NOW - 1 * D, lifecycleState: "PUBLISHED" },
-  { id: "urn:li:ugcPost:7002", commentary: "We are hiring support engineers in Santo Domingo", publishedAt: LI_NOW - 3 * D, lifecycleState: "PUBLISHED" },
+  { id: "urn:li:share:7001", commentary: "ISO 27001: why we are doing it {hashtag|\\#|security}\nMore lines here", publishedAt: LI_NOW - 1 * D, lifecycleState: "PUBLISHED", content: { multiImage: { images: [] } } },
+  { id: "urn:li:ugcPost:7002", commentary: "We are hiring support engineers in Santo Domingo", publishedAt: LI_NOW - 3 * D, lifecycleState: "PUBLISHED", content: { media: { id: "urn:li:video:9" } } },
   { id: "urn:li:share:7003", commentary: "Draft that should be hidden", publishedAt: LI_NOW - 2 * D, lifecycleState: "DRAFT" },
-  { id: "urn:li:share:7004", commentary: "Older post", publishedAt: LI_NOW - 12 * D, lifecycleState: "PUBLISHED" },
+  { id: "urn:li:share:7004", commentary: "Quarterly update", publishedAt: LI_NOW - 12 * D, lifecycleState: "PUBLISHED" },
+  { id: "urn:li:share:7005", commentary: "Older post from last month", publishedAt: LI_NOW - 40 * D, lifecycleState: "PUBLISHED", content: { media: { id: "urn:li:image:1" } } },
+  { id: "urn:li:share:7006", commentary: "Too old to count", publishedAt: LI_NOW - 90 * D, lifecycleState: "PUBLISHED" },
 ];
 export const LI_STATS: Record<string, object> = {
   "urn:li:share:7001": { impressionCount: 2400, clickCount: 60, likeCount: 80, commentCount: 12, shareCount: 8, engagement: 0.0667 },
   "urn:li:ugcPost:7002": { impressionCount: 1800, clickCount: 30, likeCount: 45, commentCount: 5, shareCount: 10 },
+  "urn:li:share:7005": { impressionCount: 900, clickCount: 9, likeCount: 10, commentCount: 1, shareCount: 0 },
   // 7004 had no activity → omitted, like LinkedIn does
 };
+/** Daily page stats: 500 impressions/day in the last 30 days, 400 before. */
+export const dayStats = (start: number) =>
+  start >= LI_NOW - 30 * D
+    ? { impressionCount: 500, clickCount: 10, likeCount: 12, commentCount: 2, shareCount: 1 }
+    : { impressionCount: 400, clickCount: 6, likeCount: 8, commentCount: 1, shareCount: 1 };
+/** New followers per week, oldest first. */
+export const LI_WEEKS = [48, 52, 61, 44, 58, 70, 66, 82, 74, 91, 118, 104];
 
 export function startFakeLinkedIn(port = 0): Promise<{ url: string; server: Server; calls: string[] }> {
   const calls: string[] = [];
@@ -86,8 +96,11 @@ export function startFakeLinkedIn(port = 0): Promise<{ url: string; server: Serv
     if (p === "/organizationalEntityShareStatistics" && q.get("q") === "organizationalEntity") {
       const raw = u.search;
       if (raw.includes("timeIntervals=")) {
-        if (!/timeIntervals=\(timeRange:\(start:\d+,end:\d+\),timeGranularityType:DAY\)/.test(decodeURIComponent(raw))) return send(400, { message: "bad timeIntervals" });
-        return send(200, { elements: Array.from({ length: 7 }, () => ({ totalShareStatistics: { impressionCount: 600, clickCount: 12, likeCount: 18, commentCount: 3, shareCount: 2 } })) });
+        const m = decodeURIComponent(raw).match(/timeIntervals=\(timeRange:\(start:(\d+),end:(\d+)\),timeGranularityType:DAY\)/);
+        if (!m) return send(400, { message: "bad timeIntervals" });
+        const els = [];
+        for (let t = Number(m[1]); t < Number(m[2]); t += D) els.push({ timeRange: { start: t, end: t + D }, totalShareStatistics: dayStats(t) });
+        return send(200, { elements: els });
       }
       const shares = raw.match(/shares=List\(([^)]*)\)/)?.[1]?.split(",").map(decodeURIComponent) ?? [];
       const ugc = [...q.entries()].filter(([k]) => /^ugcPosts\[\d+\]$/.test(k)).map(([, v]) => v);
@@ -97,7 +110,15 @@ export function startFakeLinkedIn(port = 0): Promise<{ url: string; server: Serv
       ];
       return send(200, { elements: els });
     }
-    if (p === "/networkSizes/urn:li:organization:111" && q.get("edgeType") === "COMPANY_FOLLOWED_BY_MEMBER") return send(200, { firstDegreeSize: 4321 });
+    if (p === "/organizationalEntityFollowerStatistics" && q.get("q") === "organizationalEntity") {
+      const m = decodeURIComponent(u.search).match(/timeIntervals=\(timeRange:\(start:(\d+),end:(\d+)\),timeGranularityType:WEEK\)/);
+      if (!m) return send(400, { message: "bad timeIntervals" });
+      const end = Number(m[2]);
+      return send(200, {
+        elements: LI_WEEKS.map((g, i) => ({ timeRange: { start: end - (12 - i) * 7 * D, end: end - (11 - i) * 7 * D }, followerGains: { organicFollowerGain: g - 2, paidFollowerGain: 2 } })),
+      });
+    }
+    if (p === "/networkSizes/urn:li:organization:111" && q.get("edgeType") === "COMPANY_FOLLOWED_BY_MEMBER") return send(200, { firstDegreeSize: 8412 });
     send(404, { message: `No route ${p}` });
   });
   return new Promise((resolve) =>

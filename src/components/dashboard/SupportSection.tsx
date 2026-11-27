@@ -15,7 +15,7 @@ const NUM = "text-right font-mono text-[12.5px]";
 export function SupportSection() {
   return (
     <Section id="a-support">
-      <SectionHeader num="06" title="Support team" meta="Freshdesk · last 7 days · is everyone answering on time?" />
+      <SectionHeader num="07" title="Support team" meta="Freshdesk · last 7 days · is everyone answering on time?" />
       <p className="m-0 max-w-[80ch] text-[14.5px] leading-[1.6] text-pretty text-muted">
         <strong className="font-semibold text-mint">{supportSummary.lead}</strong> {supportSummary.text}
       </p>

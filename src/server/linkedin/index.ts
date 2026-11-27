@@ -2,7 +2,7 @@ import "server-only";
 
 import type { LinkedInSummary, SourceInfo } from "@/data/types";
 import type { Store } from "../store";
-import { mapPosts, mapSummary } from "./adapt";
+import { mapSummary } from "./adapt";
 import { createLinkedInClient, LinkedInError } from "./api";
 import { LI_SNAPSHOT_KEY, LI_TOKEN_KEY, type LinkedInConfig, type StoredToken } from "./config";
 import { exchangeCode, refreshAccessToken, type TokenResponse } from "./oauth";
@@ -38,22 +38,27 @@ function toStored(t: TokenResponse, now: number, org: { id: string; name: string
   };
 }
 
-/** Fetch everything the dashboard shows (~4–5 API calls). */
+/** Fetch everything section 06 shows (~7 API calls). */
 async function fetchSummary(cfg: LinkedInConfig, token: StoredToken, now: number): Promise<LinkedInSummary> {
   const li = createLinkedInClient({ accessToken: token.accessToken, apiVersion: cfg.apiVersion, apiUrl: cfg.apiUrl });
   const id = token.organizationId;
   const dayStart = Math.floor(now / DAY) * DAY; // LinkedIn normalises ranges to UTC days
-  const [org, posts, weekDays, followers] = await Promise.all([
+  const soft = <T,>(what: string, p: Promise<T>, fallback: T) =>
+    p.catch((e) => {
+      console.warn(`[linkedin] ${what} unavailable:`, e instanceof Error ? e.message : e);
+      return fallback; // nice-to-have; don't fail the whole refresh
+    });
+  const [org, allPosts, days, followers, weekGains] = await Promise.all([
     li.organization(id),
-    li.posts(id, 10),
-    li.pageStatsByDay(id, dayStart - 7 * DAY, dayStart + DAY),
-    li.followers(id).catch((e) => {
-      console.warn("[linkedin] follower count unavailable:", e instanceof Error ? e.message : e);
-      return null; // nice-to-have; don't fail the whole refresh
-    }),
+    li.posts(id, 100),
+    li.pageStatsByDay(id, dayStart - 60 * DAY, dayStart + DAY),
+    soft("follower count", li.followers(id), null),
+    // Follower data lags ~2 days; 12 full weeks back from there.
+    soft("follower gains", li.followerGainsByWeek(id, dayStart - 2 * DAY - 12 * 7 * DAY, dayStart - 2 * DAY), []),
   ]);
-  const stats = posts.length ? await li.postStats(id, posts.map((p) => p.id)) : new Map();
-  return mapSummary({ page: { id, name: org.name, vanityName: org.vanityName }, followers, posts: mapPosts(posts, stats), weekDays, now });
+  const posts = allPosts.filter((p) => (p.publishedAt ?? p.createdAt ?? 0) >= now - 60 * DAY);
+  const postStats = posts.length ? await li.postStats(id, posts.map((p) => p.id)) : new Map();
+  return mapSummary({ page: { id, name: org.name, vanityName: org.vanityName, label: cfg.pageLabel }, followers, posts, postStats, days, weekGains: weekGains.slice(-12), now });
 }
 
 /**

@@ -6,7 +6,7 @@ import { NextBrief } from "./NextBrief";
 export function EverythingElseSection({ checks, showMetrics = true }: { checks: Check[]; showMetrics?: boolean }) {
   return (
     <Section id="a-else">
-      <SectionHeader num="08" title="Everything else" meta="Checked for you overnight" />
+      <SectionHeader num="09" title="Everything else" meta="Checked for you overnight" />
       <div className="grid gap-2.5" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))" }}>
         {checks.map((c) => {
           const tone = c.ok ? T.mint : T.amber;
