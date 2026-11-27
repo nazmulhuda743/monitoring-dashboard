@@ -184,8 +184,40 @@ export interface SourceInfo {
   name: SourceName;
   /** Last sync, Curaçao "HH:MM". */
   t: string;
-  /** live = real data, mock = sample data, error = fell back to sample data. */
-  state: "live" | "mock" | "error";
+  /**
+   * live = real data · mock = sample data (not configured) ·
+   * error = failed, showing sample data · setup = configured but needs a
+   * one-time action (e.g. "Connect LinkedIn"); see `action`.
+   */
+  state: "live" | "mock" | "error" | "setup";
+  /** Shown instead of the time when there is something to do. */
+  action?: { label: string; href: string; hint: string };
+}
+
+export interface LinkedInPost {
+  id: string;
+  url: string;
+  text: string;
+  /** Epoch ms */
+  publishedAt: number;
+  /** Curaçao "MON" / "24" for the date column */
+  dow: string;
+  day: string;
+  impressions: number;
+  reactions: number;
+  comments: number;
+  shares: number;
+  clicks: number;
+  /** 0–1, LinkedIn's engagement rate for the post */
+  engagement: number;
+}
+
+export interface LinkedInSummary {
+  page: { name: string; url: string; followers: number | null };
+  /** Most recent posts first (max ~10). */
+  posts: LinkedInPost[];
+  /** Totals for posts published in the last 7 days. */
+  week: { posts: number; impressions: number; reactions: number; comments: number; shares: number; engagement: number };
 }
 
 /** Everything the page renders that comes from an integration. */
@@ -200,4 +232,6 @@ export interface BriefData {
   sources: SourceInfo[];
   /** Extra threads in the energy visual (after needs, posts and late hand-offs). */
   otherPulls: Pull[];
+  /** Live LinkedIn page data, when connected. */
+  linkedin?: LinkedInSummary;
 }

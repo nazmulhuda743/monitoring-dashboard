@@ -1,10 +1,13 @@
 import "server-only";
 
-import { cacheLife } from "next/cache";
+import { cacheLife, cacheTag } from "next/cache";
 import { mockBrief } from "@/data/brief";
 import type { BriefData, SourceInfo } from "@/data/types";
 import { formatBusinessTime } from "@/lib/business-time";
 import { clickUpConfigFromEnv, loadClickUp } from "./clickup";
+import { mapLinkedInCheck } from "./linkedin/adapt";
+import { linkedInConfigFromEnv, loadLinkedIn } from "./linkedin";
+import { getStore } from "./store";
 
 /**
  * The page's data. Each integration replaces its part of the sample brief;
@@ -17,6 +20,7 @@ import { clickUpConfigFromEnv, loadClickUp } from "./clickup";
 export async function getBriefData(): Promise<BriefData> {
   "use cache";
   cacheLife("brief");
+  cacheTag("brief"); // revalidated when LinkedIn gets connected
   return buildBrief(Date.now());
 }
 
@@ -46,6 +50,23 @@ export async function buildBrief(now: number, env: Record<string, string | undef
     } catch (err) {
       console.error("[brief] ClickUp failed, showing sample data:", err instanceof Error ? err.message : err);
       setSource("ClickUp", { state: "error" });
+    }
+  }
+  const li = linkedInConfigFromEnv(env);
+  if (li) {
+    try {
+      const r = await loadLinkedIn(li, getStore(env), now);
+      if (r.summary) {
+        data.linkedin = r.summary;
+        const check = mapLinkedInCheck(r.summary, now);
+        data.checks = data.checks.map((c) => (c.source === "LinkedIn" ? check : c));
+      }
+      if (r.state === "live") setSource("LinkedIn", { state: r.action ? "setup" : "live", t: formatBusinessTime(new Date(r.fetchedAt)), action: r.action });
+      else if (r.state === "setup") setSource("LinkedIn", { state: "setup", action: r.action });
+      else setSource("LinkedIn", { state: "error" });
+    } catch (err) {
+      console.error("[brief] LinkedIn failed:", err instanceof Error ? err.message : err);
+      setSource("LinkedIn", { state: "error" });
     }
   }
   return data;

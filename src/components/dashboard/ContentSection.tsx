@@ -6,6 +6,7 @@ import type { Post, PostStatus } from "@/data/types";
 import { T, type Tone } from "@/lib/tones";
 import { Eyebrow, Pill, PillRow, Section, SectionHeader } from "@/components/ui/primitives";
 import { useBrief, weekPosts } from "./BriefProvider";
+import { LinkedInPosts } from "./LinkedInPosts";
 
 const STATUS: Record<PostStatus, [string, Tone]> = {
   ready: ["Needs your OK", T.blue],
@@ -206,7 +207,7 @@ function Legend({ style, children }: { style: CSSProperties; children: string })
 }
 
 export function ContentSection() {
-  const { range, setRange, postStatus, approveAll } = useBrief();
+  const { data, range, setRange, postStatus, approveAll } = useBrief();
   const inRange = range === "week" ? weekPosts : posts;
   const cnt = (s: PostStatus) => inRange.filter((p) => postStatus(p) === s).length;
   const ready = inRange.filter((p) => postStatus(p) === "ready");
@@ -251,6 +252,7 @@ export function ContentSection() {
       ) : (
         <MonthView />
       )}
+      {data.linkedin && <LinkedInPosts li={data.linkedin} />}
     </Section>
   );
 }

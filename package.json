@@ -11,7 +11,8 @@
     "compare": "node scripts/compare-design.cjs",
     "shoot:mobile": "node scripts/shoot-mobile.cjs",
     "test": "vitest run",
-    "fake:clickup": "node --no-warnings src/test/fake-clickup.ts"
+    "fake:clickup": "node --no-warnings src/test/fake-clickup.ts",
+    "fake:linkedin": "node --no-warnings src/test/fake-linkedin.ts"
   },
   "dependencies": {
     "next": "16.4.6",

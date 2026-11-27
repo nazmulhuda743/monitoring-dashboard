@@ -121,20 +121,34 @@ function NavPanel({ onNavigate, className = "" }: { onNavigate?: () => void; cla
       <div className="min-h-5 flex-1" />
       <div className="-mx-0.5 flex flex-col gap-[9px] rounded-[14px] px-3 pt-3.5 pb-0.5" style={{ background: "rgba(4,7,10,.35)", border: "1px solid rgba(255,255,255,.05)" }}>
         <Eyebrow color="#545D68">Sources · live</Eyebrow>
-        {data.sources.map((s) => (
-          <div
-            key={s.name}
-            className="flex items-center gap-2 text-[12.5px] font-medium text-muted"
-            title={s.state === "error" ? `${s.name}: couldn't refresh, showing sample data` : s.state === "mock" ? `${s.name}: sample data (not connected yet)` : `${s.name}: live, synced ${s.t} Curaçao time`}
-          >
-            <span
-              className="size-1.5 rounded-full"
-              style={s.state === "error" ? { background: "#F5B13D", boxShadow: "0 0 8px #F5B13D" } : { background: "#1FE0A0", boxShadow: "0 0 8px #1FE0A0" }}
-            />
-            <span className="flex-1">{s.name}</span>
-            <span className="font-mono text-[11px]" style={{ color: s.state === "error" ? "#F5B13D" : "#5C6570" }}>{s.state === "error" ? "retrying" : s.t}</span>
-          </div>
-        ))}
+        {data.sources.map((s) => {
+          const warn = s.state === "error" || s.state === "setup";
+          const title =
+            s.action?.hint ??
+            (s.state === "error"
+              ? `${s.name}: couldn't refresh, showing sample data`
+              : s.state === "mock"
+                ? `${s.name}: sample data (not connected yet)`
+                : `${s.name}: live, synced ${s.t} Curaçao time`);
+          return (
+            <div key={s.name} className="flex items-center gap-2 text-[12.5px] font-medium text-muted" title={title}>
+              <span
+                className="size-1.5 rounded-full"
+                style={warn ? { background: "#F5B13D", boxShadow: "0 0 8px #F5B13D" } : { background: "#1FE0A0", boxShadow: "0 0 8px #1FE0A0" }}
+              />
+              <span className="flex-1">{s.name}</span>
+              {s.action ? (
+                <a href={s.action.href} className="font-mono text-[11px] text-amber! underline underline-offset-2 hover:text-fg!">
+                  {s.action.label}
+                </a>
+              ) : (
+                <span className="font-mono text-[11px]" style={{ color: warn ? "#F5B13D" : "#5C6570" }}>
+                  {s.state === "error" ? "retrying" : s.t}
+                </span>
+              )}
+            </div>
+          );
+        })}
         <span className="h-1" />
       </div>
     </nav>

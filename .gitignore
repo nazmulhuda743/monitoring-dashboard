@@ -43,3 +43,6 @@ next-env.d.ts
 
 # visual comparison output
 /.compare
+
+# local key-value store (dev only)
+/.data

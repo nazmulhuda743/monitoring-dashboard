@@ -27,8 +27,10 @@ support doing, what did I decide, and is everything else fine.
   `design/design-source.html`. When in doubt about a value, grep it there.
 - **Phase 1 (done):** pixel-match the design at 1440px desktop, using mock data.
 - **Phase 2 (done):** responsive — tablet and phone layouts (no design for these; ours).
-- **Phase 3 (in progress):** live integrations. **ClickUp is built** (needs the
-  client's token in Vercel); Freshdesk, Calendar, LinkedIn still show sample data.
+- **Phase 3 (in progress):** live integrations. **ClickUp is live** (token in
+  Vercel). **LinkedIn is built** — waiting for LinkedIn to approve the CDS app's
+  Community Management API (Development tier) request; then env vars + Upstash
+  + one-time "connect". Freshdesk and Calendar still show sample data.
 
 ## Stack
 
@@ -53,6 +55,9 @@ npm run compare      # needs `npm start` running; diffs app vs design at 1440px
 node scripts/compare-design.cjs 1800 400   # + side-by-side crop of a band → .compare/crop.png
 npm run shoot:mobile # needs `npm start`; iPhone/360px/tablet screenshots + overflow check → .compare/mobile/
 npm test             # vitest: ClickUp mapping + end-to-end loader against a fake ClickUp
+npm run fake:linkedin # fake LinkedIn (OAuth + API) on :4020 — client cid/csecret; with
+                     #   LINKEDIN_CLIENT_ID=cid LINKEDIN_CLIENT_SECRET=csecret
+                     #   LINKEDIN_API_URL=http://localhost:4020/rest LINKEDIN_OAUTH_URL=http://localhost:4020/oauth/v2
 npm run fake:clickup # fake ClickUp API on :4010 (token pk_test) for local demos:
                      #   CLICKUP_API_TOKEN=pk_test CLICKUP_API_URL=http://localhost:4010 npm run dev
 ```
@@ -72,6 +77,10 @@ src/data/brief.ts             sample data (verbatim from the design) → `mockBr
 src/server/brief.ts           getBriefData(): 'use cache' + cacheLife("brief") — sample brief
                               with each live integration patched in; failures fall back
 src/server/clickup/           api.ts (client) · adapt.ts (pure mapping, tested) · index.ts (loader + env config)
+src/server/linkedin/          config · oauth · api (client) · adapt (pure, tested) · index (loader, connect)
+                              · routes (helpers for the two API routes)
+src/server/store.ts           key-value store: Upstash Redis on Vercel, .data/store.json locally
+src/app/api/linkedin/{connect,callback}/route.ts   one-time OAuth "Allow LinkedIn" flow
 src/app/api/health/route.ts   GET /api/health — integration states + counts (no secrets)
 src/test/                     ClickUp fixtures, fake ClickUp server, test stubs
 src/lib/tones.ts              semantic tones {fg, tint}: red/blue/amber/mint/grey
@@ -182,6 +191,18 @@ Section anchors (used by nav + scroll-spy): `#top #a-needs #a-waiting
   ~20 API calls per refresh (ClickUp limit: 100/min).
 - Still to do for ClickUp: write actions (Mark done → close task, Nudge →
   comment) and tuning on real data.
+- **LinkedIn** (company page only — personal profiles/drafts aren't available
+  via API): CDS developer app "CDS Executive Dashboard" (client id
+  86wvgkratkxrum), Community Management API Development tier requested
+  2026-11-27 (legal name Caribglobal Data Services B.V., Caracasbaaiweg 199-A,
+  Willemstad, Curaçao). Flow: sidebar "connect" → /api/linkedin/connect →
+  LinkedIn → /api/linkedin/callback → token in store (TOFU: later reconnects
+  must be admin of the same page, or LINKEDIN_ORGANIZATION_ID). Data: last 10
+  page posts + lifetime stats, 7-day page totals, followers → section 05
+  "Published on …" panel (only when connected) + "Posting" check card.
+  LinkedIn is called at most every 30 min (snapshot in store) ≈ 240 calls/day
+  < 500 dev-tier limit. Access tokens last 60 days; refresh tokens may not be
+  granted → sidebar shows "reconnect" a week before expiry.
 
 ## Known, accepted differences from the design export
 
